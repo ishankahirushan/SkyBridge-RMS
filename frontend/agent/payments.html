@@ -4,8 +4,150 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Payments</title>
+  <link rel="stylesheet" href="../assets/css/agent.css" />
 </head>
 <body>
-  <h1>Payment Processing</h1>
+  <div class="container">
+    <nav class="navbar">
+      <div class="navbar-left">
+        <h1>SkyBridge RMS</h1>
+      </div>
+      <div class="navbar-right">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="flights.html">Search Flights</a>
+        <a href="bookings.html">My Bookings</a>
+        <a href="passengers.html">Verify Passengers</a>
+        <a href="payments.html" class="active">Payments</a>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </nav>
+
+    <div class="content">
+      <div class="tabs">
+        <button class="tab-button active" data-tab="process-payment">Process Payment</button>
+        <button class="tab-button" data-tab="process-refund">Process Refund</button>
+      </div>
+
+      <!-- Process Payment Tab -->
+      <div class="tab-content active" id="process-payment">
+        <h2>Process Payment</h2>
+        
+        <form id="paymentForm" class="form-section">
+          <h3>Payment Details</h3>
+          
+          <div class="form-group">
+            <label for="bookingRef">Booking Reference *</label>
+            <input 
+              type="text" 
+              id="bookingRef" 
+              name="bookingRef" 
+              placeholder="Enter booking reference" 
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">Payment Method *</label>
+            <select id="paymentMethod" name="paymentMethod" required>
+              <option value="">-- Select Payment Method --</option>
+              <option value="CASH">Cash Payment</option>
+              <option value="CARD">Card Payment</option>
+            </select>
+          </div>
+
+          <!-- Card Payment Fields -->
+          <div id="cardPaymentFields" style="display: none;">
+            <div class="form-group">
+              <label for="cardNo">Card Number</label>
+              <input 
+                type="text" 
+                id="cardNo" 
+                name="cardNo" 
+                placeholder="Enter card number"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="accountNo">Account Number (Alternative)</label>
+              <input 
+                type="text" 
+                id="accountNo" 
+                name="accountNo" 
+                placeholder="Enter account number"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Process Payment</button>
+        </form>
+
+        <div id="paymentMessage" class="message-box" style="display: none;"></div>
+      </div>
+
+      <!-- Process Refund Tab -->
+      <div class="tab-content" id="process-refund">
+        <h2>Process Refund</h2>
+        
+        <form id="refundForm" class="form-section">
+          <h3>Refund Details</h3>
+          
+          <div class="form-group">
+            <label for="refundBookingRef">Booking Reference *</label>
+            <input 
+              type="text" 
+              id="refundBookingRef" 
+              name="refundBookingRef" 
+              placeholder="Enter booking reference" 
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="refundType">Refund Type *</label>
+            <select id="refundType" name="refundType" required>
+              <option value="">-- Select Refund Type --</option>
+              <option value="ACCOUNT">Refund to Passenger Account</option>
+              <option value="CASH">Refund as Cash</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Process Refund</button>
+        </form>
+
+        <div id="refundMessage" class="message-box" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/agent-payments.js"></script>
+  <script>
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      fetch('../../backend/auth/logout.php', { method: 'POST' })
+        .then(() => window.location.href = '../public/login.html')
+        .catch(err => console.error('Logout error:', err));
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // Show/hide card fields based on payment method
+    document.getElementById('paymentMethod').addEventListener('change', (e) => {
+      const cardFields = document.getElementById('cardPaymentFields');
+      if (e.target.value === 'CARD') {
+        cardFields.style.display = 'block';
+      } else {
+        cardFields.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>

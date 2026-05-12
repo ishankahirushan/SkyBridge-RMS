@@ -3,12 +3,378 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBridge RMS - Landing</title>
+  <title>SkyBridge RMS - Airline Ticket Agency</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #0b1220;
+      background: #f7f9fc;
+    }
+
+    /* Navbar */
+    nav {
+      background: linear-gradient(135deg, #0a1628 0%, #1b2b4b 100%);
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    nav h1 {
+      font-size: 1.8em;
+      letter-spacing: 1px;
+    }
+
+    nav p {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    nav .nav-left {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    nav .nav-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #c9a227;
+    }
+
+    nav .btn-login {
+      background: #2f6bff;
+      padding: 10px 25px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    nav .btn-login:hover {
+      background: #1f52cc;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #2f6bff 0%, #1b2b4b 100%);
+      color: white;
+      padding: 100px 40px;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .hero p {
+      font-size: 1.3em;
+      margin-bottom: 40px;
+      opacity: 0.95;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #c9a227;
+      color: #0a1628;
+    }
+
+    .btn-primary:hover {
+      background: #d9b237;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #2f6bff;
+    }
+
+    .btn-secondary:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 80px 40px;
+      background: white;
+    }
+
+    .features h3 {
+      text-align: center;
+      font-size: 2.2em;
+      margin-bottom: 60px;
+      color: #0a1628;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: #f7f9fc;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .feature-card:hover {
+      background: white;
+      border-color: #2f6bff;
+      box-shadow: 0 8px 20px rgba(47, 107, 255, 0.1);
+      transform: translateY(-5px);
+    }
+
+    .feature-card .icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+    }
+
+    .feature-card h4 {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      color: #0a1628;
+    }
+
+    .feature-card p {
+      color: #4b5563;
+      line-height: 1.6;
+    }
+
+    /* Ticket Access Section */
+    .ticket-access {
+      background: linear-gradient(135deg, #0a1628 0%, #1b2b4b 100%);
+      color: white;
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .ticket-access h3 {
+      font-size: 2.2em;
+      margin-bottom: 20px;
+    }
+
+    .ticket-access p {
+      font-size: 1.1em;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+
+    .ticket-access .btn-primary {
+      background: #c9a227;
+      color: #0a1628;
+    }
+
+    /* Footer */
+    footer {
+      background: #0a1628;
+      color: white;
+      padding: 40px;
+      text-align: center;
+      border-top: 2px solid #c9a227;
+    }
+
+    footer p {
+      margin-bottom: 10px;
+    }
+
+    footer .footer-links {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    footer a {
+      color: #c9a227;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    footer a:hover {
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+      }
+
+      nav .nav-right {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .hero {
+        padding: 60px 20px;
+      }
+
+      .hero h2 {
+        font-size: 2em;
+      }
+
+      .hero p {
+        font-size: 1.1em;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .features {
+        padding: 60px 20px;
+      }
+
+      .features h3 {
+        font-size: 1.8em;
+      }
+
+      .ticket-access {
+        padding: 60px 20px;
+      }
+
+      .ticket-access h3 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>SkyBridge RMS</h1>
-    <p>Airline Ticket Agency Management System</p>
-  </main>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-left">
+      <h1>✈️ SkyBridge RMS</h1>
+      <p>Airline Ticket Agency</p>
+    </div>
+    <div class="nav-right">
+      <a href="ticket-view.html">Search Tickets</a>
+      <a href="login.html" class="btn-login">Agent Login</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h2>Your Trusted Airline Ticket Partner</h2>
+    <p>Book, manage, and retrieve your airline tickets with ease</p>
+    <div class="cta-buttons">
+      <a href="ticket-view.html" class="btn btn-primary">🎫 Search My Ticket</a>
+      <a href="#features" class="btn btn-secondary">Learn More</a>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="features" id="features">
+    <h3>Why Choose SkyBridge?</h3>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">✈️</div>
+        <h4>Wide Airline Selection</h4>
+        <p>Access flights from 10+ major airlines across worldwide destinations</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">🛡️</div>
+        <h4>Secure & Verified</h4>
+        <p>All passengers verified through our comprehensive passport verification system</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">💳</div>
+        <h4>Flexible Payment</h4>
+        <p>Pay via cash or card with our simulated payment processing system</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">📱</div>
+        <h4>Easy Access</h4>
+        <p>Retrieve and manage your tickets anytime, anywhere without logging in</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">📋</div>
+        <h4>Complete Details</h4>
+        <p>Get comprehensive ticket information with pricing breakdown</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">🖨️</div>
+        <h4>Print & Download</h4>
+        <p>Print tickets directly or download as PDF for your records</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Access Section -->
+  <div class="ticket-access">
+    <h3>Already Have a Booking?</h3>
+    <p>Retrieve your ticket details instantly using your booking reference and passport number</p>
+    <a href="ticket-view.html" class="btn btn-primary">📥 View My Ticket</a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 SkyBridge RMS. All rights reserved.</p>
+    <p>Your reliable partner in airline ticket management</p>
+    <div class="footer-links">
+      <a href="ticket-view.html">Search Tickets</a>
+      <a href="login.html">Agent Portal</a>
+      <a href="#features">Features</a>
+    </div>
+  </footer>
 </body>
 </html>

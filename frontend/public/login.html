@@ -3,29 +3,261 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBridge RMS - Login</title>
+  <title>SkyBridge RMS - Agent Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1b2b4b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .login-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .login-header h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+
+    .login-header p {
+      font-size: 1em;
+      opacity: 0.9;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-card h2 {
+      color: #0a1628;
+      margin-bottom: 30px;
+      font-size: 1.8em;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #0b1220;
+      margin-bottom: 8px;
+      font-size: 1.05em;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e3e8ef;
+      border-radius: 4px;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2f6bff;
+      box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.1);
+    }
+
+    input::placeholder {
+      color: #8a94a6;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #2f6bff 0%, #1f52cc 100%);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+
+    .login-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(47, 107, 255, 0.3);
+    }
+
+    .login-button:active {
+      transform: translateY(0);
+    }
+
+    #login-message {
+      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    #login-message.error {
+      background: #fee;
+      color: #c33;
+      border-left: 4px solid #dc2626;
+      display: block;
+    }
+
+    #login-message.success {
+      background: #efe;
+      color: #0a0;
+      border-left: 4px solid #1f9d55;
+      display: block;
+    }
+
+    #login-message.info {
+      background: #eef;
+      color: #00a;
+      border-left: 4px solid #2f6bff;
+      display: block;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #2f6bff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .back-link a:hover {
+      color: #1f52cc;
+    }
+
+    .demo-credentials {
+      background: #f7f9fc;
+      border-left: 4px solid #c9a227;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 25px;
+      color: #4b5563;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .demo-credentials strong {
+      color: #0b1220;
+    }
+
+    .demo-credentials .demo-row {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .demo-credentials .demo-label {
+      font-weight: 600;
+    }
+
+    .demo-credentials .demo-value {
+      font-family: monospace;
+      color: #2f6bff;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 25px;
+      }
+
+      .login-header h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>SkyBridge RMS Login</h1>
-    <p>Use your agent or administrator credentials.</p>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>✈️ SkyBridge RMS</h1>
+      <p>Agent Portal</p>
+    </div>
 
-    <form id="login-form" novalidate>
-      <div>
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" required />
+    <div class="login-card">
+      <h2>Sign In</h2>
+      
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input 
+            id="email" 
+            name="email" 
+            type="email" 
+            placeholder="agent@example.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password *</label>
+          <input 
+            id="password" 
+            name="password" 
+            type="password" 
+            placeholder="Enter your password"
+            required 
+            minlength="6"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button type="submit" class="login-button">🔐 Sign In</button>
+      </form>
+
+      <p id="login-message" aria-live="polite"></p>
+
+      <div class="demo-credentials">
+        <strong>Demo Credentials:</strong>
+        <div class="demo-row">
+          <span class="demo-label">Admin:</span>
+          <span class="demo-value">admin@skybridge.com / password123</span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-label">Agent 1:</span>
+          <span class="demo-value">agent1@skybridge.com / password123</span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-label">Agent 2:</span>
+          <span class="demo-value">agent2@skybridge.com / password123</span>
+        </div>
       </div>
 
-      <div>
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required minlength="6" />
+      <div class="back-link">
+        <a href="index.html">← Back to Home</a>
       </div>
-
-      <button type="submit">Sign In</button>
-    </form>
-
-    <p id="login-message" aria-live="polite"></p>
-  </main>
+    </div>
+  </div>
 
   <script src="../assets/js/login.js"></script>
 </body>
