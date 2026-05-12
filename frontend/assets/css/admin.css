@@ -1,0 +1,174 @@
+:root {
+  --brand-navy: #0a1628;
+  --brand-indigo: #1b2b4b;
+  --brand-blue: #2f6bff;
+  --luxury-gold: #c9a227;
+  --soft-background: #f7f9fc;
+  --card-background: #eef2f7;
+  --border-light: #e3e8ef;
+  --text-primary: #0b1220;
+  --text-secondary: #4b5563;
+  --background: #ffffff;
+  --success: #1f9d55;
+  --danger: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  background: linear-gradient(180deg, #f7f9fc 0%, #eef2f7 100%);
+  color: var(--text-primary);
+}
+
+.topbar {
+  background: var(--brand-navy);
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 12px;
+}
+
+.topbar a {
+  color: #dbe7ff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.topbar a.active {
+  color: #fff;
+  font-weight: 700;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px 32px;
+}
+
+.panel {
+  background: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--card-background);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.card h3 {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.metric {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+  padding: 10px;
+  font-size: 14px;
+}
+
+th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand-blue);
+  color: #fff;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: var(--brand-indigo);
+}
+
+button.warning {
+  background: var(--danger);
+}
+
+form.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-active,
+.status-enabled {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.status-inactive,
+.status-disabled {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.notice {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  form.grid {
+    grid-template-columns: 1fr;
+  }
+}

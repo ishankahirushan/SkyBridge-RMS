@@ -3,9 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Agents</title>
+  <title>SkyBridge RMS - Agent Management</title>
+  <link rel="stylesheet" href="../assets/css/admin.css" />
 </head>
 <body>
-  <h1>Agent Management</h1>
+  <header class="topbar">
+    <div>
+      <strong>SkyBridge RMS</strong>
+      <span id="session-user"></span>
+    </div>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="airlines.html">Airlines</a>
+      <a class="active" href="agents.html">Agents</a>
+      <a href="reports.html">Reports</a>
+      <button id="logout-btn" class="secondary" type="button">Logout</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h1>Agent Management</h1>
+      <form id="create-agent-form" class="grid" novalidate>
+        <div>
+          <label for="full_name">Full Name</label>
+          <input id="full_name" name="full_name" required />
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" minlength="6" required />
+        </div>
+        <div>
+          <label for="role">Role</label>
+          <select id="role" name="role">
+            <option value="AGENT">AGENT</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+        <button type="submit">Create Agent</button>
+      </form>
+      <p class="notice" id="agents-message">Loading agents...</p>
+    </section>
+
+    <section class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="agents-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="../assets/js/admin-common.js"></script>
+  <script src="../assets/js/admin-agents.js"></script>
 </body>
 </html>
