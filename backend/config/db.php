@@ -1,33 +1,40 @@
 <?php
+/**
+ * Database Configuration
+ * SkyBridge RMS - Airline Ticket Agency Management System
+ */
 
-declare(strict_types=1);
+// Database Credentials
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '1234');
+define('DB_NAME', 'skybridge_rms');
+define('DB_PORT', 3306);
 
-function getDatabaseConnection(): PDO
-{
-    $host = getenv('DB_HOST') ?: '127.0.0.1';
-    $port = getenv('DB_PORT') ?: '3306';
-    $database = getenv('DB_NAME') ?: 'skybridge_rms';
-    $username = getenv('DB_USER') ?: 'root';
-    $password = getenv('DB_PASS') ?: '1234';
-
-    $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
-
-    try {
-        return new PDO($dsn, $username, $password, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
-    } catch (PDOException $exception) {
-        if (PHP_SAPI !== 'cli') {
-            header('Content-Type: application/json');
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection failed.'
-            ]);
-        }
-
-        throw $exception;
+// Connection Error Handling
+try {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+    
+    // Check connection
+    if ($conn->connect_error) {
+        throw new Exception("Database Connection Failed: " . $conn->connect_error);
     }
+    
+    // Set charset to UTF-8
+    $conn->set_charset("utf8mb4");
+    
+    // Enable error reporting for development
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    die(json_encode([
+        'status' => 'error',
+        'message' => 'Database connection error',
+        'error' => $e->getMessage()
+    ]));
 }
+
+// Return connection object for use throughout the application
+// Usage: require_once 'backend/config/db.php';
+// Then use: $conn for database queries

@@ -1,97 +1,61 @@
 <?php
 
-declare(strict_types=1);
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/response.php';
+require_once __DIR__ . '/audit.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function sendJsonResponse(array $payload, int $statusCode = 200): void
+function current_user(): ?array
 {
-    http_response_code($statusCode);
-    header('Content-Type: application/json');
-    echo json_encode($payload);
-    exit;
+    return $_SESSION['user'] ?? null;
 }
 
-function requireRequestMethod(string $method): void
+function is_authenticated(): bool
 {
-    if ($_SERVER['REQUEST_METHOD'] !== strtoupper($method)) {
-        sendJsonResponse([
-            'success' => false,
-            'message' => 'Method not allowed.'
-        ], 405);
-    }
+    return current_user() !== null;
 }
 
-function getJsonBody(): array
+function require_auth(array $allowedRoles = []): array
 {
-    $rawBody = file_get_contents('php://input');
-    $payload = json_decode($rawBody ?: '', true);
-
-    if (!is_array($payload)) {
-        sendJsonResponse([
-            'success' => false,
-            'message' => 'Invalid JSON payload.'
-        ], 400);
+    if (!is_authenticated()) {
+        error_response('Unauthorized', 401);
     }
 
-    return $payload;
-}
+    $user = current_user();
 
-function getSessionUser(): ?array
-{
-    if (!isset($_SESSION['user_id'], $_SESSION['role'], $_SESSION['email'])) {
-        return null;
-    }
-
-    return [
-        'user_id' => (int)$_SESSION['user_id'],
-        'full_name' => (string)($_SESSION['full_name'] ?? ''),
-        'email' => (string)$_SESSION['email'],
-        'role' => (string)$_SESSION['role'],
-        'logged_in_at' => (string)($_SESSION['logged_in_at'] ?? '')
-    ];
-}
-
-function requireLogin(): array
-{
-    $user = getSessionUser();
-
-    if ($user === null) {
-        sendJsonResponse([
-            'success' => false,
-            'message' => 'Unauthorized.'
-        ], 401);
+    if (!empty($allowedRoles) && !in_array($user['role'], $allowedRoles, true)) {
+        error_response('Forbidden', 403);
     }
 
     return $user;
 }
 
-function requireAdmin(): array
+function authenticate_agent(mysqli $conn, string $email, string $password): array
 {
-    $user = requireLogin();
+    $sql = "SELECT agent_id, full_name, email, password, role, status FROM agents WHERE email = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
 
-    if ($user['role'] !== 'ADMIN') {
-        sendJsonResponse([
-            'success' => false,
-            'message' => 'Forbidden.'
-        ], 403);
+    if (!$stmt) {
+        error_response('Database error', 500);
     }
 
-    return $user;
-}
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $agent = $result->fetch_assoc();
+    $stmt->close();
 
-function requireAgent(): array
-{
-    $user = requireLogin();
-
-    if (!in_array($user['role'], ['ADMIN', 'AGENT'], true)) {
-        sendJsonResponse([
-            'success' => false,
-            'message' => 'Forbidden.'
-        ], 403);
+    if (!$agent || $agent['status'] !== 'active') {
+        error_response('Invalid credentials', 401);
     }
 
-    return $user;
+    if (!password_verify($password, $agent['password'])) {
+        error_response('Invalid credentials', 401);
+    }
+
+    unset($agent['password']);
+    return $agent;
 }

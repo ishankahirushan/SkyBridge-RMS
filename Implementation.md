@@ -1,51 +1,117 @@
-# Airline Ticket Agency Management System — Final Full Implementation Plan
+# Airline Ticket Agency Management System — Final Complete Implementation Plan
 
 ---
 
-## 1. Project Overview
+# 1. Project Overview
 
-### Project Name
-**Airline Ticket Agency Management System**
+## Project Name
+
+```text id="7m2q5v"
+Airline Ticket Agency Management System
+```
 
 ---
 
-## 2. Project Goal
+# 2. Project Goal
 
 Develop a realistic airline ticket agency management system that simulates the operational workflow of a real-world travel agency.
 
-The system focuses on:
-- Airline management
-- Flight searching
-- Passenger verification
-- Ticket booking
-- Payment processing
-- Ticket generation
-- Refunds
-- Operational reporting
+The system is designed as:
 
-The project is designed as:
-**Internal airline agency operational software** instead of a public airline booking website.
-
----
-
-## 3. Technology Stack
-
-### Frontend
-- HTML5
-- CSS3
-- Vanilla JavaScript
-
-### Backend
-- Pure PHP
-
-### Database
-- MySQL
-
----
-
-## 4. System Architecture
-
+```text id="4x7p1n"
+internal airline agency operational software
 ```
+
+instead of a public airline booking website.
+
+The project focuses on:
+
+* airline management
+* flight searching
+* passenger verification
+* reservation workflows
+* payment processing
+* refund processing
+* ticket generation
+* operational reporting
+
+The system should feel like:
+
+```text id="9k3w6r"
+real enterprise reservation software
+```
+
+while still remaining achievable using:
+
+* Vanilla JavaScript
+* Pure PHP
+* MySQL
+
+---
+
+# 3. Technology Stack
+
+---
+
+# Frontend
+
+* HTML5
+* CSS3
+* Vanilla JavaScript
+
+---
+
+# Backend
+
+* Pure PHP
+
+---
+
+# Database
+
+* MySQL
+
+---
+
+# 4. Core System Philosophy
+
+The project follows:
+
+```text id="2v8m4q"
+workflow-oriented operational architecture
+```
+
+NOT:
+
+```text id="7n3x5m"
+basic CRUD-only architecture
+```
+
+The system simulates:
+
+* real travel agency workflows
+* external airline systems
+* external banking systems
+* government passport verification systems
+
+ALL inside:
+
+```text id="5m2q8v"
+a single MySQL database
+```
+
+for:
+
+* simplicity
+* academic feasibility
+* offline implementation
+* API simulation
+
+---
+
+# 5. System Architecture
+
+```text id="1p6v4x"
 Frontend (HTML/CSS)
         ↓
 Vanilla JavaScript
@@ -58,70 +124,100 @@ MySQL Database
 
 ---
 
-## 5. Architectural Principles
+# 6. Architectural Principles
 
-### 5.1 Frontend and Backend Separation
+---
 
-The project separates:
-- Frontend UI
-- Frontend interaction logic
-- Backend business logic
-- Database layer
+# 6.1 Frontend and Backend Separation
 
-#### Frontend Responsibilities
-- UI rendering
-- Forms
-- Tables
-- Modals
-- DOM updates
-- Fetch requests
+The project uses:
 
-#### JavaScript Responsibilities
-- Form submissions
-- AJAX requests
-- Updating UI dynamically
-- Updating tables instantly
-- Modal handling
-- Validation messages
-
-#### Backend Responsibilities
-- Authentication
-- Database operations
-- Business logic
-- Validation
-- Payment processing
-- Ticket generation
-
-#### Database Responsibilities
-- Store operational data
-- Store airline data
-- Store booking records
-- Store simulated payment data
-
-### 5.2 No Page Refresh Architecture
-
-The system behaves like a modern application.
-
-The system DOES NOT use:
-- Traditional page refresh workflow
-
-Instead:
-- Forms submit using JavaScript `fetch()`
-- PHP returns JSON responses
-- JavaScript updates UI instantly
-
-### 5.3 No Polling Architecture
-
-The system DOES NOT use:
-- Constant polling
-
-Instead:
-- After successful operations
-- JavaScript immediately updates affected tables/components
-
-**Example:**
+```text id="8q4n1m"
+clean frontend/backend separation
 ```
-Create booking
+
+---
+
+# Frontend Responsibilities
+
+* UI rendering
+* forms
+* tables
+* modal windows
+* DOM updates
+* user interactions
+
+---
+
+# JavaScript Responsibilities
+
+* fetch() requests
+* form submission handling
+* dynamic UI updates
+* table rendering
+* validation messages
+* workflow control
+
+---
+
+# Backend Responsibilities
+
+* authentication
+* business logic
+* database operations
+* payment processing
+* booking management
+* ticket generation
+
+---
+
+# Database Responsibilities
+
+* operational data storage
+* simulated external systems
+* booking records
+* financial simulation
+
+---
+
+# 6.2 No Page Refresh Architecture
+
+The system behaves like:
+
+```text id="6x9p3w"
+modern operational software
+```
+
+Forms NEVER:
+
+* reload pages
+* redirect pages
+
+Instead:
+
+* JavaScript handles submissions using `fetch()`
+* PHP returns JSON responses
+* JavaScript updates UI instantly
+
+---
+
+# 6.3 No Polling Architecture
+
+The system DOES NOT use:
+
+```text id="3m8q1v"
+constant polling
+```
+
+Instead:
+
+* after successful operations
+* JavaScript immediately updates affected tables/components
+
+Example:
+
+```text id="9v2m6x"
+Create Booking
 → Backend inserts booking
 → Backend returns booking data
 → JS appends new row instantly
@@ -129,485 +225,990 @@ Create booking
 
 ---
 
-## 6. User Roles
+# 7. User Roles
 
-### 6.1 Administrator
+---
+
+# 7.1 Administrator
 
 Administrators manage:
-- Supported airlines
-- Ticket agents
-- Reports and analytics
 
-### 6.2 Ticket Agent
+* supported airlines
+* ticket agents
+* reports and analytics
+* company operational configuration
+
+---
+
+# 7.2 Ticket Agent
 
 Agents perform:
-- Flight searching
-- Passenger verification
-- Booking creation
-- Payment processing
-- Ticket generation
-- Refunds
 
-### 6.3 Passenger
+* passport verification
+* flight searching
+* reservation workflows
+* payment processing
+* ticket generation
+* refunds
+
+---
+
+# 7.3 Passenger
 
 Passengers:
-- Visit physical agency
-- Provide travel details
-- Receive tickets
-- Download tickets online without login
+
+* visit physical agency offices
+* provide travel details
+* receive tickets
+* download tickets online without login
 
 ---
 
-## 7. Realistic Business Model
+# 8. Logical Database Separation
 
-The system simulates:
-**A real travel agency operation** instead of a direct airline booking platform.
+ALL tables exist inside:
 
-### 7.1 Airline Ownership Concept
+```text id="4m2x8q"
+one MySQL database
+```
 
-Flights belong to airlines.
+BUT are logically separated into:
 
-The agency DOES NOT create flights manually.
+* internal company systems
+* airline systems
+* banking systems
+* government systems
 
-Instead:
-- Flight data is considered imported airline data
+This simulates:
 
-### 7.2 Agency Supported Airlines
+```text id="5x9n2v"
+external system integrations
+```
 
-The agency only works with selected airlines.
+without requiring:
+
+* real APIs
+* multiple databases
+* network services
+
+---
+
+# 8.1 Company Operational Tables
+
+These represent:
+
+```text id="8p1q6m"
+internal agency-owned data
+```
+
+Tables:
+
+* agency
+* agents
+* passengers
+* bookings
+* transactions
+* our_airlines
+* audit_logs
+
+These tables:
+
+* are fully controlled by the company
+* contain audit tracking fields
+* generate audit logs
+
+---
+
+# 8.2 Airline Global Tables
+
+These simulate:
+
+```text id="4m2x8q"
+external airline provider systems
+```
+
+Tables:
+
+* airlines
+* flights
+* flight_seat_categories
+
+Agency:
+
+* only reads/filter these tables
+* does NOT manage global airline data
 
 Therefore:
-- Global airline data
-- Agency airline access
-are separated.
+
+* no audit fields
+* no audit logs
 
 ---
 
-## 8. Database Design
+# 8.3 Banking System Tables
 
-### 8.1 airlines
-Master airline registry
+These simulate:
 
-| Field | Type |
-|-------|------|
-| airline_id | INT PK |
-| airline_name | VARCHAR |
-| airline_code | VARCHAR |
-| country | VARCHAR |
-| status | VARCHAR |
+```text id="5x9n2v"
+external banking infrastructure
+```
 
-### 8.2 flights
-Master flight repository
+Tables:
 
-| Field | Type |
-|-------|------|
-| flight_id | INT PK |
-| airline_id | FK |
-| flight_no | VARCHAR |
-| departure_airport | VARCHAR |
-| destination_airport | VARCHAR |
-| departure_datetime | DATETIME |
-| arrival_datetime | DATETIME |
-| available_seats | INT |
-| base_ticket_price | DECIMAL |
+* payment_accounts
 
-### 8.3 our_airlines
-Agency enabled airlines
+Agency:
 
-| Field | Type |
-|-------|------|
-| id | INT PK |
-| airline_id | FK |
-| status | VARCHAR |
+* only communicates with this system
 
-**Purpose:** Determine which airlines are supported by the agency
+Therefore:
 
-### 8.4 agents
-
-| Field | Type |
-|-------|------|
-| agent_id | INT PK |
-| full_name | VARCHAR |
-| email | VARCHAR |
-| password | VARCHAR |
-| role | VARCHAR |
-| status | VARCHAR |
-
-### 8.5 passengers
-
-| Field | Type |
-|-------|------|
-| passenger_id | INT PK |
-| passport_no | VARCHAR |
-| given_names | VARCHAR |
-| surname | VARCHAR |
-| email | VARCHAR |
-| contact_no | VARCHAR |
-
-### 8.6 passport_verification
-
-| Field | Type |
-|-------|------|
-| verification_id | INT PK |
-| passport_no | VARCHAR |
-| expiry_date | DATE |
-| status | VARCHAR |
-
-**Possible status:**
-- VALID
-- EXPIRED
-- BLACKLISTED
-
-### 8.7 bookings
-
-| Field | Type |
-|-------|------|
-| booking_ref | VARCHAR PK |
-| passenger_id | FK |
-| flight_id | FK |
-| agent_id | FK |
-| seat_no | VARCHAR |
-| base_price | DECIMAL |
-| service_charge | DECIMAL |
-| discount | DECIMAL |
-| final_price | DECIMAL |
-| booking_status | VARCHAR |
-| payment_status | VARCHAR |
-| booking_date | DATETIME |
-
-### 8.8 payment_accounts
-Simulated payment system
-
-| Field | Type |
-|-------|------|
-| account_id | INT PK |
-| owner_type | VARCHAR |
-| owner_name | VARCHAR |
-| card_no | VARCHAR |
-| account_no | VARCHAR |
-| current_balance | DECIMAL |
-
-**Purpose:**
-- Represent passenger accounts
-- Represent agency accounts
-- Simulate payment processing
-
-### 8.9 transactions
-
-| Field | Type |
-|-------|------|
-| transaction_id | INT PK |
-| booking_ref | FK |
-| payment_method | VARCHAR |
-| amount | DECIMAL |
-| transaction_status | VARCHAR |
-| transaction_date | DATETIME |
+* no audit fields
+* no audit logs
 
 ---
 
-## 9. Pricing Logic
+# 8.4 Government System Tables
 
-The system uses realistic business pricing.
+These simulate:
 
-### Formula
-```
-Final Ticket Price =
-Airline Base Price
-+ Agency Service Charge
-- Agent Discount
+```text id="8p1q6m"
+passport department systems
 ```
 
-### Example
-```
-Airline Price = $500
-Agency Fee = $40
-Discount = $20
+Tables:
 
-Final Price = $520
+* passport_verification
+
+Agency:
+
+* only validates against this system
+
+Therefore:
+
+* no audit fields
+* no audit logs
+
+---
+
+# 9. Audit Tracking Architecture
+
+---
+
+# 9.1 Audit Fields
+
+Critical company tables contain:
+
+| Field      |
+| ---------- |
+| created_at |
+| created_by |
+| updated_at |
+| updated_by |
+
+---
+
+# 9.2 Audit Logs Table
+
+## audit_logs
+
+Purpose:
+
+```text id="4m2x8q"
+track important operational activities
 ```
 
 ---
 
-## 10. Payment System
+# Example Logged Events
 
-The system uses:
-**Simulated payment processing** instead of real banking APIs.
-
-### 10.1 Cash Payment Workflow
-1. Agent selects CASH
-2. System displays total amount
-3. Agent confirms payment
-4. Agency account balance increases
-5. Payment marked SUCCESS
-
-### 10.2 Card Payment Workflow
-1. Agent selects CARD
-2. Agent enters:
-   - Card number
-   - Account number
-3. System checks balance
-4. If enough balance:
-   - Deduct passenger balance
-   - Add agency balance
-   - Payment success
-5. Otherwise:
-   - Payment failed
-
-### 10.3 Refund Workflow
-
-**Refund types:**
-- Cash refund
-- Card/account refund
-
-#### Refund by Account
-System:
-- Deducts agency balance
-- Adds passenger balance
-
-#### Refund by Cash
-System:
-- Deducts agency balance
+* login
+* logout
+* booking creation
+* payment success
+* refund issued
+* booking cancellation
+* airline enable/disable
+* agent creation/update
 
 ---
 
-## 11. Booking Workflow
-
-### Step 1 — Flight Search
-Agent searches:
-- Departure airport
-- Destination airport
-- Travel date
-
-System only shows flights belonging to:
-**our_airlines**
-
-### Step 2 — Passenger Registration
-Agent enters:
-- Passport number
-- Names
-- Contact information
-
-### Step 3 — Passenger Verification
-System checks:
-- Passport expiry
-- Blacklist status
-
-### Step 4 — Price Calculation
-System calculates:
-- Base ticket price
-- Agency fee
-- Optional discount
-
-### Step 5 — Payment Processing
-Agent selects:
-- Cash
-- Card
-
-System processes payment.
-
-### Step 6 — Booking Confirmation
-System:
-- Generates booking reference
-- Allocates seat
-- Stores booking
-
-### Step 7 — E-Ticket Generation
-Passenger can:
-- View ticket
-- Print ticket
-- Download ticket
-without login.
+# 10. Database Design
 
 ---
 
-## 12. Public Pages
+# 10.1 agency
 
-### 12.1 Landing Page
-**Purpose:**
-- Branding
-- Quick navigation
-- Agency introduction
-- Ticket retrieval access
+Stores company information.
 
-### 12.2 Ticket Search & Download Page
-Passenger enters:
-- Booking reference
-- Passport number/account details
-
-System:
-- Retrieves ticket
-- Allows viewing
-- Allows downloading
-
----
-
-## 13. Internal Pages
-
-### 13.1 Login Page
-Single authentication page.
-Redirects users based on role.
-
-### 13.2 Admin Dashboard
-Contains:
-- Analytics
-- Airline management
-- Agent management
-- Operational summaries
-
-### 13.3 Agent Dashboard
-Contains:
-- Flight search
-- Booking management
-- Passenger verification
-- Payment processing
-- Ticket generation
+| Field          |
+| -------------- |
+| agency_id      |
+| agency_name    |
+| whatsapp       |
+| email          |
+| service_charge |
+| account_number |
+| address        |
+| logo           |
+| created_at     |
+| created_by     |
+| updated_at     |
+| updated_by     |
 
 ---
 
-## 14. Administrator Features
+# 10.2 airlines
 
-### 14.1 Airline Management
-Admin manages:
-**our_airlines**
+Global airline registry.
 
-Functions:
-- Enable airline
-- Disable airline
-
-### 14.2 Agent Management
-Functions:
-- Create agents
-- Edit agents
-- Deactivate agents
-- Reset passwords
-
-### 14.3 Analytics & Reports
-Reports include:
-- Total bookings
-- Total revenue
-- Bookings per airline
-- Popular destinations
-- Refund statistics
-- Agent activity
+| Field        |
+| ------------ |
+| airline_id   |
+| airline_name |
+| airline_code |
+| country      |
+| status       |
 
 ---
 
-## 15. Agent Features
+# 10.3 flights
 
-### 15.1 Flight Search
-Search flights dynamically.
+Global flight repository.
 
-### 15.2 Passenger Verification
-Validate:
-- Expiry dates
-- Blacklist status
-
-### 15.3 Booking Management
-Functions:
-- Create bookings
-- Cancel bookings
-- Search bookings
-- View booking history
-
-### 15.4 Payment Management
-Functions:
-- Process payments
-- Process refunds
-- Validate balances
-
-### 15.5 Ticket Generation
-Functions:
-- Generate ticket
-- Download PDF
-- Print ticket
+| Field               |
+| ------------------- |
+| flight_id           |
+| airline_id          |
+| flight_no           |
+| departure_airport   |
+| destination_airport |
+| departure_datetime  |
+| arrival_datetime    |
+| base_ticket_price   |
 
 ---
 
-## 16. Frontend Behavior
+# 10.4 flight_seat_categories
 
-The system behaves like a modern operational application.
+Stores seat categories and availability.
 
-### 16.1 Form Submission Behavior
-Forms NEVER redirect pages.
+| Field            |
+| ---------------- |
+| category_id      |
+| flight_id        |
+| seat_category    |
+| total_seats      |
+| available_seats  |
+| price_multiplier |
 
-Forms submit using:
-**`fetch()`**
+---
 
-PHP returns:
-**JSON responses**
+# Seat Categories
 
-### 16.2 Dynamic UI Updates
-After operations:
-- Tables update instantly
-- Dashboard statistics update instantly
-- Booking lists update instantly
+```text id="5x9n2v"
+First Class
+Business Class
+Premium Economy
+Economy Class
+```
+
+---
+
+# 10.5 our_airlines
+
+Stores airlines supported by the agency.
+
+| Field      |
+| ---------- |
+| id         |
+| airline_id |
+| status     |
+| created_at |
+| created_by |
+| updated_at |
+| updated_by |
+
+---
+
+# 10.6 agents
+
+Stores operational agents.
+
+| Field      |
+| ---------- |
+| agent_id   |
+| full_name  |
+| email      |
+| password   |
+| role       |
+| status     |
+| created_at |
+| created_by |
+| updated_at |
+| updated_by |
+
+---
+
+# 10.7 passengers
+
+Stores ONLY successfully paid passengers.
+
+| Field          |
+| -------------- |
+| passenger_id   |
+| booking_ref    |
+| passport_no    |
+| full_name      |
+| contact_no     |
+| email          |
+| payment_method |
+| created_at     |
+| created_by     |
+| updated_at     |
+| updated_by     |
+
+IMPORTANT:
+
+```text id="8p1q6m"
+unpaid passengers are NEVER stored
+```
+
+---
+
+# 10.8 passport_verification
+
+Simulated government verification database.
+
+| Field           |
+| --------------- |
+| verification_id |
+| passport_no     |
+| full_name       |
+| expiry_date     |
+| status          |
+
+---
+
+# Possible Status Values
+
+```text id="4m2x8q"
+VALID
+EXPIRED
+BLACKLISTED
+```
+
+---
+
+# 10.9 bookings
+
+Stores successful reservations.
+
+| Field          |
+| -------------- |
+| booking_ref    |
+| passenger_id   |
+| flight_id      |
+| seat_category  |
+| agent_id       |
+| base_price     |
+| service_charge |
+| discount       |
+| final_price    |
+| booking_status |
+| payment_status |
+| booking_date   |
+| created_at     |
+| created_by     |
+| updated_at     |
+| updated_by     |
+
+---
+
+# 10.10 payment_accounts
+
+Simulated bank database.
+
+| Field           |
+| --------------- |
+| account_id      |
+| owner_type      |
+| owner_name      |
+| card_no         |
+| account_no      |
+| current_balance |
+
+---
+
+# 10.11 transactions
+
+Stores operational payment transactions.
+
+| Field              |
+| ------------------ |
+| transaction_id     |
+| booking_ref        |
+| payment_method     |
+| amount             |
+| transaction_status |
+| transaction_date   |
+| created_at         |
+| created_by         |
+| updated_at         |
+| updated_by         |
+
+---
+
+# 10.12 audit_logs
+
+Stores operational activity history.
+
+| Field       |
+| ----------- |
+| log_id      |
+| user_id     |
+| action_type |
+| table_name  |
+| record_id   |
+| description |
+| created_at  |
+
+---
+
+# 11. Frontend Structure
+
+The frontend contains:
+
+* public pages
+* protected internal operational pages
+
+---
+
+# 11.1 Public Pages
+
+These pages:
+
+* require NO login
+* are customer-facing only
+
+---
+
+# Public Pages
+
+| Page                          |
+| ----------------------------- |
+| Landing Page                  |
+| Ticket Search & Download Page |
+
+---
+
+# Important Rule
+
+Public pages:
+
+* MUST NOT contain login portals
+* MUST NOT expose internal operations
+
+---
+
+# 11.2 Internal System Pages
+
+These pages require:
+
+```text id="5x9n2v"
+successful authentication
+```
+
+Main pages:
+
+* Login Page
+* Dashboard Page
+
+Internal operational routes:
+
+* should not be publicly exposed
+* require session validation
+
+---
+
+# 12. Internal Dashboard Architecture
+
+Dashboard content changes dynamically based on:
+
+```text id="8p1q6m"
+user role
+```
+
+---
+
+# 12.1 Administrator Dashboard
+
+Admin pages remain as originally planned.
+
+---
+
+# Admin Features
+
+* airline management
+* agent management
+* operational analytics
+* reports
+
+---
+
+# 12.2 Agent Dashboard
+
+Agent dashboard contains:
+
+```text id="4m2x8q"
+3 sidebar tabs
+```
+
+| Tab         |
+| ----------- |
+| Home        |
+| Reservation |
+| Registry    |
+
+---
+
+# 13. Agent Dashboard — Home Tab
+
+Displays:
+
+* total bookings
+* today's revenue
+* refund count
+* recent transactions
+* active flights
+* operational summaries
+
+Purpose:
+
+```text id="5x9n2v"
+basic operational statistics
+```
+
+---
+
+# 14. Agent Dashboard — Reservation Tab
+
+This is:
+
+```text id="8p1q6m"
+the main reservation workflow page
+```
+
+The reservation process is:
+
+* sequential
+* workflow-driven
+* dynamically revealed
 
 WITHOUT:
-- Page refresh
-- Polling
+
+* page refreshes
+* redirects
 
 ---
 
-## 17. Recommended Folder Structure
+# STEP 1 — Passport Verification
 
+Initially visible fields:
+
+| Field         |
+| ------------- |
+| Passport ID   |
+| Submit Button |
+
+---
+
+# Verification Process
+
+System communicates with:
+
+```text id="4m2x8q"
+passport_verification
 ```
-project/
-│
-├── frontend/
-│   │
-│   ├── public/
-│   │   ├── index.html
-│   │   ├── ticket-search.html
-│   │   └── ticket-view.html
-│   │
-│   ├── admin/
-│   │   ├── dashboard.html
-│   │   ├── airlines.html
-│   │   ├── agents.html
-│   │   └── reports.html
-│   │
-│   ├── agent/
-│   │   ├── dashboard.html
-│   │   ├── flights.html
-│   │   ├── bookings.html
-│   │   ├── passengers.html
-│   │   └── payments.html
-│   │
-│   └── assets/
-│       ├── css/
-│       ├── js/
-│       └── images/
-│
-├── backend/
-│   │
-│   ├── config/
-│   │   └── db.php
-│   │
-│   ├── auth/
-│   │   ├── login.php
-│   │   └── logout.php
-│   │
-│   ├── airlines/
-│   ├── flights/
-│   ├── bookings/
-│   ├── passengers/
-│   ├── payments/
-│   ├── reports/
-│   │
-│   └── utils/
-│
-├── uploads/
-│
-└── database/
-    └── airline_system.sql
+
+(simulated government system)
+
+---
+
+# If Verification Fails
+
+Examples:
+
+* passport not found
+* expired
+* blacklisted
+
+Then:
+
+* flow stops
+* error message shown
+
+Example:
+
+```text id="5x9n2v"
+Verification Failed — Passport Expired
 ```
 
 ---
 
-## 18. JavaScript Communication Pattern
+# If Verification Succeeds
 
-### Example Flow
+System returns:
+
+* passenger name
+
+Then dynamically reveals:
+
+* passenger information fields
+* flight search fields
+
+---
+
+# STEP 2 — Passenger Information
+
+Visible fields:
+
+| Field              |
+| ------------------ |
+| Name (auto-filled) |
+| Contact            |
+| Email              |
+
+Name comes from:
+
+```text id="8p1q6m"
+passport verification system
 ```
+
+---
+
+# STEP 3 — Flight Search
+
+Agent enters:
+
+| Field             |
+| ----------------- |
+| Departure Date    |
+| Departure Airport |
+| Arrival Airport   |
+
+Then clicks:
+
+```text id="4m2x8q"
+Search Flights
+```
+
+---
+
+# Flight Search Logic
+
+System searches:
+
+* flights
+* airlines
+* flight_seat_categories
+* our_airlines
+
+using selected filters.
+
+---
+
+# IMPORTANT FLIGHT FILTER RULE
+
+A flight ONLY appears IF:
+
+```text id="5x9n2v"
+at least one seat exists in any category
+```
+
+Meaning:
+
+* not every category needs seats
+* at least one available seat overall is enough
+
+---
+
+# STEP 4 — Flight Result Table
+
+After search:
+a dynamic table appears.
+
+---
+
+# Table Columns
+
+| Column                     |
+| -------------------------- |
+| Flight ID                  |
+| Airline Name               |
+| Departure Time             |
+| Arrival Time               |
+| First Class Free Seats     |
+| Business Class Free Seats  |
+| Premium Economy Free Seats |
+| Economy Free Seats         |
+
+---
+
+# Important Behavior
+
+If a category has:
+
+```text id="8p1q6m"
+0 seats available
+```
+
+Then it should:
+
+* appear disabled
+  OR
+* appear marked FULL
+
+---
+
+# Flight Selection
+
+Agent:
+
+* selects a flight
+* selects a seat category based on availability
+
+Agents DO NOT manually memorize flight IDs.
+
+---
+
+# STEP 5 — Pricing
+
+After flight and category selection:
+pricing section appears.
+
+---
+
+# Visible Pricing Fields
+
+| Field          | Editable |
+| -------------- | -------- |
+| Base Price     | NO       |
+| Service Charge | NO       |
+| Discount       | YES      |
+| Final Price    | AUTO     |
+
+---
+
+# Pricing Formula
+
+```text id="4m2x8q"
+(base price × seat multiplier)
++ agency service charge
+- discount
+```
+
+---
+
+# STEP 6 — Payment Processing
+
+Payment methods:
+
+| Method |
+| ------ |
+| Cash   |
+| Card   |
+
+---
+
+# CASH PAYMENT FLOW
+
+If:
+
+```text id="5x9n2v"
+Cash selected
+```
+
+Then:
+
+* company account number auto appears from agency table
+* no manual bank input required
+
+---
+
+# Cash Payment Success
+
+System:
+
+* increases company balance
+* creates booking
+* creates passenger record
+* creates transaction record
+
+Then:
+
+```text id="8p1q6m"
+Payment Successful
+```
+
+---
+
+# CARD PAYMENT FLOW
+
+If:
+
+```text id="4m2x8q"
+Card selected
+```
+
+Visible fields:
+
+| Field                                |
+| ------------------------------------ |
+| Card Number                          |
+| Company Account Number (auto-filled) |
+
+---
+
+# Card Validation Workflow
+
+System communicates with:
+
+```text id="5x9n2v"
+payment_accounts
+```
+
+(simulated banking system)
+
+---
+
+# Validation Sequence
+
+---
+
+# 1. Card Exists?
+
+If not:
+
+```text id="8p1q6m"
+Card Not Found
+```
+
+Flow stops.
+
+---
+
+# 2. Balance Enough?
+
+If insufficient:
+
+```text id="4m2x8q"
+Insufficient Balance
+```
+
+Flow stops.
+
+---
+
+# 3. Successful Transaction
+
+System:
+
+* deducts passenger balance
+* increases company balance
+* creates booking
+* creates passenger
+* creates transaction
+
+Then:
+
+```text id="5x9n2v"
+Payment Successful
+```
+
+---
+
+# IMPORTANT BUSINESS RULE
+
+Passenger data is stored ONLY after:
+
+```text id="8p1q6m"
+successful payment
+```
+
+---
+
+# 15. Agent Dashboard — Registry Tab
+
+Purpose:
+
+```text id="4m2x8q"
+manage successfully paid passengers
+```
+
+---
+
+# Registry Table Columns
+
+| Column            |
+| ----------------- |
+| Booking Reference |
+| Passenger Name    |
+| Flight            |
+| Seat Category     |
+| Payment Method    |
+| Paid Amount       |
+| Status            |
+| Actions           |
+
+---
+
+# Action Column
+
+Contains:
+
+```text id="5x9n2v"
+Cancel Button
+```
+
+---
+
+# 16. Refund Workflow
+
+---
+
+# CARD PAYMENT REFUND
+
+System:
+
+* decreases company balance
+* increases passenger balance
+
+Then:
+
+```text id="8p1q6m"
+Refund Successful
+```
+
+---
+
+# CASH PAYMENT REFUND
+
+System:
+
+* decreases company balance
+
+NO passenger balance increase because:
+
+```text id="4m2x8q"
+cash payments are not digitally stored in passenger accounts
+```
+
+---
+
+# 17. JavaScript Communication Pattern
+
+```text id="5x9n2v"
 HTML Form
     ↓
 JavaScript fetch()
@@ -623,27 +1224,80 @@ JavaScript DOM Update
 
 ---
 
-## 19. UI Design Direction
+# 18. Recommended Folder Structure
 
-The interface should feel like:
-**Enterprise airline agency software**
-
-NOT:
-**Consumer travel booking website**
-
-### Recommended UI Style
-- Navy blue palette
-- White work surfaces
-- Clean tables
-- Operational dashboards
-- Minimal animations
-- Enterprise layout
+```text id="8p1q6m"
+project/
+│
+├── frontend/
+│   │
+│   ├── public/
+│   │   ├── index.html
+│   │   ├── ticket-search.html
+│   │   └── ticket-view.html
+│   │
+│   ├── internal/
+│   │   ├── login.html
+│   │   └── dashboard.html
+│   │
+│   └── assets/
+│       ├── css/
+│       ├── js/
+│       └── images/
+│
+├── backend/
+│   │
+│   ├── config/
+│   │   └── db.php
+│   │
+│   ├── auth/
+│   │
+│   ├── bookings/
+│   ├── passengers/
+│   ├── payments/
+│   ├── reports/
+│   ├── flights/
+│   ├── airlines/
+│   │
+│   └── utils/
+│
+├── uploads/
+│
+└── database/
+    └── airline_system.sql
+```
 
 ---
 
-## 20. Design System & Color Palette
+# 19. UI Design Direction
 
-### CSS Variables
+The interface should feel like:
+
+```text id="4m2x8q"
+enterprise airline operational software
+```
+
+NOT:
+
+```text id="5x9n2v"
+consumer travel booking website
+```
+
+---
+
+# Recommended Design Style
+
+* navy blue branding
+* white work surfaces
+* operational dashboards
+* clean tables
+* minimal animations
+* enterprise layout
+* data-focused interface
+
+---
+
+# 20. Design System & Color Palette
 
 ```css
 --brand-navy: #0a1628;
@@ -658,115 +1312,38 @@ NOT:
 --text-muted: #8a94a6;
 --background: #ffffff;
 --foreground: #0b1220;
+
 --success: #1f9d55;
 --warning: #d97706;
 --danger: #dc2626;
 ```
 
-### Color Usage Guide
-
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `--brand-navy` | Primary dark brand color | Navigation bars, headers |
-| `--brand-indigo` | Secondary dark color | Sidebar backgrounds |
-| `--brand-blue` | Primary action color | Buttons, links, highlights |
-| `--luxury-gold` | Accent color | Premium features, badges |
-| `--soft-background` | Page background | Overall page surface |
-| `--card-background` | Card/box backgrounds | Content cards, panels |
-| `--border-light` | Border color | Dividers, borders |
-| `--text-primary` | Main text color | Body text, labels |
-| `--text-secondary` | Secondary text | Subtext, descriptions |
-| `--text-muted` | Muted text | Hints, timestamps |
-| `--background` | Element backgrounds | Form inputs, surfaces |
-| `--foreground` | Element text | Button text, icons |
-| `--success` | Success state | Confirmation, success messages |
-| `--warning` | Warning state | Warnings, caution messages |
-| `--danger` | Error state | Errors, deletions, alerts |
-
 ---
 
-## 21. Future Improvements (Optional)
+# 21. Final System Direction
 
-Possible future additions:
-- Real airline APIs
-- Real banking integration
-- Email notifications
-- QR code tickets
-- Seat map visualization
-- Real-time flight tracking
+This project is:
 
-These are outside first-year scope.
-
----
-
-## 22. Final System Direction
-
-This project is designed as:
-**A realistic airline ticket agency operational management system**
+```text id="8p1q6m"
+a realistic airline ticket agency operational management system
+```
 
 with:
-- Realistic workflows
-- Airline separation
-- Operational dashboards
-- Passenger verification
-- Simulated payment processing
-- Instant UI updates
-- No page refreshes
-- No polling
-- Clean frontend/backend separation
+
+* workflow-driven reservations
+* simulated external systems
+* dynamic frontend behavior
+* enterprise operational architecture
+* realistic payment simulation
+* audit tracking
+* seat-category management
+* refund workflows
+* no page refreshes
+* no polling
+* clean frontend/backend separation
 
 while remaining fully achievable using:
-- Vanilla JavaScript
-- Pure PHP
-- MySQL
 
----
-
-## Implementation Checklist
-
-### Phase 1: Setup & Database
-- [ ] Set up project folder structure
-- [ ] Create MySQL database schema
-- [ ] Configure PHP database connection
-- [ ] Create test data for airlines, flights, and accounts
-
-### Phase 2: Authentication
-- [ ] Create login page
-- [ ] Implement PHP login endpoint
-- [ ] Implement role-based redirect logic
-- [ ] Create logout functionality
-
-### Phase 3: Admin Dashboard
-- [ ] Build admin dashboard UI
-- [ ] Implement airline management features
-- [ ] Implement agent management features
-- [ ] Create analytics and reports pages
-
-### Phase 4: Agent Dashboard
-- [ ] Build agent dashboard UI
-- [ ] Implement flight search functionality
-- [ ] Implement passenger verification system
-- [ ] Create booking management interface
-
-### Phase 5: Booking System
-- [ ] Implement booking creation workflow
-- [ ] Create payment processing system
-- [ ] Implement refund functionality
-- [ ] Create ticket generation system
-
-### Phase 6: Public Pages
-- [ ] Create landing page
-- [ ] Build ticket search and download page
-- [ ] Implement public ticket viewing
-
-### Phase 7: Testing & Optimization
-- [ ] Test all workflows
-- [ ] Optimize database queries
-- [ ] Ensure no page refreshes
-- [ ] Test responsive design
-
----
-
-**Document Version:** 1.0  
-**Last Updated:** 2024  
-**Status:** Ready for Implementation
+* Vanilla JavaScript
+* Pure PHP
+* MySQL

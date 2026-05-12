@@ -1,97 +1,42 @@
 <?php
 
-declare(strict_types=1);
-
-session_start();
-
-require_once dirname(__DIR__) . '/config/db.php';
-
-header('Content-Type: application/json');
+require_once __DIR__ . '/../utils/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed.'
-    ]);
-    exit;
+    error_response('Method not allowed', 405);
 }
 
-$rawBody = file_get_contents('php://input');
-$payload = json_decode($rawBody ?: '', true);
-
-if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid request payload.'
-    ]);
-    exit;
-}
-
-$email = trim((string)($payload['email'] ?? ''));
-$password = (string)($payload['password'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$password = trim($_POST['password'] ?? '');
 
 if ($email === '' || $password === '') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Email and password are required.'
-    ]);
-    exit;
+    error_response('Email and password are required', 422);
 }
 
 try {
-    $pdo = getDatabaseConnection();
+    $user = authenticate_agent($conn, $email, $password);
 
-    $statement = $pdo->prepare(
-        'SELECT agent_id, full_name, email, password, role, status FROM agents WHERE email = :email LIMIT 1'
+    $_SESSION['user'] = [
+        'agent_id' => (int) $user['agent_id'],
+        'full_name' => $user['full_name'],
+        'email' => $user['email'],
+        'role' => $user['role'],
+    ];
+
+    audit_log(
+        $conn,
+        (int) $user['agent_id'],
+        'login',
+        'agents',
+        (string) $user['agent_id'],
+        'User logged in successfully'
     );
-    $statement->execute(['email' => $email]);
-    $agent = $statement->fetch();
 
-    if (!$agent || $agent['status'] !== 'ACTIVE') {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid credentials.'
-        ]);
-        exit;
-    }
-
-    $storedPassword = (string)$agent['password'];
-    $passwordMatch = password_verify($password, $storedPassword) || hash_equals($storedPassword, $password);
-
-    if (!$passwordMatch) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid credentials.'
-        ]);
-        exit;
-    }
-
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = (int)$agent['agent_id'];
-    $_SESSION['full_name'] = (string)$agent['full_name'];
-    $_SESSION['email'] = (string)$agent['email'];
-    $_SESSION['role'] = (string)$agent['role'];
-    $_SESSION['logged_in_at'] = date('c');
-
-    $redirectUrl = $_SESSION['role'] === 'ADMIN'
-        ? '../admin/dashboard.html'
-        : '../agent/dashboard.html';
-
-    echo json_encode([
-        'success' => true,
-        'message' => 'Login successful.',
-        'role' => $_SESSION['role'],
-        'redirectUrl' => $redirectUrl
+    success_response('Login successful', [
+        'user' => $_SESSION['user'],
     ]);
 } catch (Throwable $exception) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Authentication failed due to a server error.'
+    error_response('Login failed', 500, [
+        'error' => $exception->getMessage(),
     ]);
 }
