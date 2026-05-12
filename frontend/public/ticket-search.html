@@ -5,6 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Booking - SkyBridge RMS</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .ticket-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ticket-header h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .ticket-status {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .ticket-status.paid {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .ticket-status.unpaid {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+        }
+
+        .ticket-status.cancelled {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .ticket-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ticket-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .ticket-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .ticket-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ticket-field-label {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .ticket-field-value {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .ticket-field-value.highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .flight-route {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .airport {
+            text-align: center;
+        }
+
+        .airport-code {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .airport-name {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .route-arrow {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .search-box h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .search-box p {
+            text-align: center;
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+        }
+
+        @media print {
+            header, footer, .search-box {
+                display: none;
+            }
+            body {
+                background: white;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -25,10 +189,11 @@
     <main class="main-content">
         <section class="search-section">
             <div class="container">
-                <div style="max-width: 500px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: var(--shadow);">
-                    <h2 style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">Search Your Booking</h2>
+                <div class="search-box">
+                    <h2>🔍 Search Your Booking</h2>
+                    <p>Enter your booking reference to view ticket details and download your confirmation.</p>
                     
-                    <form id="searchForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <form id="searchForm">
                         <div class="form-group">
                             <label for="bookingRef">Booking Reference:</label>
                             <input 
@@ -36,23 +201,139 @@
                                 id="bookingRef" 
                                 name="booking_ref" 
                                 required 
-                                placeholder="e.g., SKY-20260515-ABC123"
-                                style="font-family: monospace; text-transform: uppercase;"
+                                placeholder="SKY-20260515-ABC123"
+                                autocomplete="off"
                             >
+                            <small style="color: var(--dark-gray); margin-top: 0.25rem; display: block;">
+                                Example: SKY-20260515-ABC123 (found in your confirmation email)
+                            </small>
                         </div>
 
-                        <div id="errorMessage" class="error-message" style="display: none;"></div>
+                        <div id="errorMessage" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
 
                         <button type="submit" class="btn btn-primary btn-block">Search Booking</button>
                     </form>
+                </div>
 
-                    <div id="searchResults" style="margin-top: 2rem; display: none;">
-                        <div id="bookingDetails"></div>
-                        <div style="margin-top: 1rem;">
-                            <button onclick="downloadTicketPDF()" class="btn btn-success" style="margin-right: 0.5rem;">📥 Download PDF</button>
-                            <button onclick="printTicket()" class="btn btn-info">🖨️ Print Ticket</button>
+                <div id="searchResults" style="display: none;">
+                    <div class="ticket-container">
+                        <div class="ticket-header">
+                            <h2>✈️ Your Booking Ticket</h2>
+                            <span id="ticketStatus" class="ticket-status"></span>
+                        </div>
+
+                        <!-- Booking Reference Section -->
+                        <div class="ticket-section">
+                            <div class="ticket-grid">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Booking Reference</div>
+                                    <div id="bookingRefDisplay" class="ticket-field-value highlight"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Booking Date</div>
+                                    <div id="bookingDate" class="ticket-field-value"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passenger Information Section -->
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">👤 Passenger Information</div>
+                            <div class="ticket-grid">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Passenger Name</div>
+                                    <div id="passengerName" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Passport Number</div>
+                                    <div id="passportNumber" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Passport Expiry</div>
+                                    <div id="passportExpiry" class="ticket-field-value"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flight Information Section -->
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">✈️ Flight Details</div>
+                            
+                            <div style="margin-bottom: 1.5rem;">
+                                <div class="ticket-field-label">Airline</div>
+                                <div id="airlineName" class="ticket-field-value"></div>
+                            </div>
+
+                            <div class="flight-route">
+                                <div class="airport">
+                                    <div class="airport-code" id="departureCode"></div>
+                                    <div class="airport-name" id="departureName"></div>
+                                </div>
+                                <div class="route-arrow">→</div>
+                                <div class="airport">
+                                    <div class="airport-code" id="arrivalCode"></div>
+                                    <div class="airport-name" id="arrivalName"></div>
+                                </div>
+                            </div>
+
+                            <div class="ticket-grid" style="margin-top: 1.5rem;">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Flight Number</div>
+                                    <div id="flightCode" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Departure Date</div>
+                                    <div id="departureDate" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Departure Time</div>
+                                    <div id="departureTime" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Seat Number</div>
+                                    <div id="seatNumber" class="ticket-field-value highlight"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Seat Category</div>
+                                    <div id="seatCategory" class="ticket-field-value"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Section -->
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">💰 Pricing Information</div>
+                            <div class="ticket-grid">
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Base Price (per person)</div>
+                                    <div id="basePrice" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Service Charge</div>
+                                    <div id="serviceCharge" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Discount Applied</div>
+                                    <div id="discount" class="ticket-field-value"></div>
+                                </div>
+                                <div class="ticket-field">
+                                    <div class="ticket-field-label">Total Amount</div>
+                                    <div id="totalAmount" class="ticket-field-value highlight" style="font-size: 1.5rem;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button onclick="printTicket()" class="btn btn-primary">🖨️ Print Ticket</button>
+                            <button onclick="downloadTicket()" class="btn btn-secondary">📥 Download PDF</button>
+                            <button onclick="newSearch()" class="btn btn-info">🔄 New Search</button>
                         </div>
                     </div>
+
+                    <p style="text-align: center; color: var(--dark-gray); margin-top: 2rem; font-size: 0.9rem;">
+                        For booking modifications or cancellations, please contact your travel agent or our support team at support@skybridge.lk
+                    </p>
                 </div>
             </div>
         </section>
@@ -61,17 +342,23 @@
     <footer class="footer">
         <div class="container">
             <p>&copy; 2026 SkyBridge RMS. All rights reserved.</p>
-            <p>For booking support, contact your travel agent.</p>
+            <p>For booking support, contact support@skybridge.lk or your travel agent.</p>
         </div>
     </footer>
 
-    <script src="../assets/js/utils.js"></script>
-    <script src="../assets/js/api.js"></script>
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Searching for your booking...</p>
+    </div>
+
     <script>
         // Initialize search form
         document.getElementById('searchForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            await performSearch();
+        });
 
+        async function performSearch() {
             const bookingRef = document.getElementById('bookingRef').value.trim().toUpperCase();
             const errorDiv = document.getElementById('errorMessage');
             const resultsDiv = document.getElementById('searchResults');
@@ -84,7 +371,6 @@
             showLoading(true);
 
             try {
-                // Use the bookings search API
                 const response = await fetch(`http://localhost:8000/backend/bookings/search.php?booking_ref=${encodeURIComponent(bookingRef)}`);
                 const result = await response.json();
 
@@ -92,107 +378,73 @@
                     displayBookingTicket(result.data);
                     resultsDiv.style.display = 'block';
                     errorDiv.style.display = 'none';
+                    document.getElementById('searchForm').parentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 } else {
-                    showError('Booking not found. Please check the reference number.', 'errorMessage');
+                    showError('Booking not found. Please verify your booking reference and try again.', 'errorMessage');
                     resultsDiv.style.display = 'none';
                 }
             } catch (error) {
+                console.error('Search error:', error);
                 showError('Error searching booking: ' + error.message, 'errorMessage');
                 resultsDiv.style.display = 'none';
             } finally {
                 showLoading(false);
             }
-        });
-
-        function displayBookingTicket(booking) {
-            const detailsDiv = document.getElementById('bookingDetails');
-            
-            const ticketHTML = `
-                <div style="border: 2px dashed var(--primary-color); padding: 1.5rem; border-radius: 8px; background-color: var(--light-gray);">
-                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Booking Ticket</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <strong>Booking Reference:</strong>
-                            <p style="font-family: monospace; font-size: 1.1rem; color: var(--primary-color);">${booking.booking_ref}</p>
-                        </div>
-                        <div>
-                            <strong>Status:</strong>
-                            <p style="font-weight: 500; color: ${booking.payment_status === 'paid' ? 'var(--success-color)' : 'var(--warning-color)'}">${booking.payment_status?.toUpperCase()}</p>
-                        </div>
-                    </div>
-
-                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1rem 0;">
-
-                    <h4 style="margin-bottom: 0.5rem;">Passenger Information</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <strong>Name:</strong>
-                            <p>${booking.passenger_name || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <strong>Passport:</strong>
-                            <p>${booking.passport_number || 'N/A'}</p>
-                        </div>
-                    </div>
-
-                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1rem 0;">
-
-                    <h4 style="margin-bottom: 0.5rem;">Flight Information</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <strong>Flight:</strong>
-                            <p>${booking.flight_code || 'N/A'} (${booking.airline_name || 'N/A'})</p>
-                        </div>
-                        <div>
-                            <strong>Departure:</strong>
-                            <p>${booking.departure_date ? formatDate(booking.departure_date) : 'N/A'}</p>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div>
-                            <strong>Route:</strong>
-                            <p>${booking.departure_airport || 'N/A'} → ${booking.arrival_airport || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <strong>Seat:</strong>
-                            <p>${booking.seat_number || 'N/A'}</p>
-                        </div>
-                    </div>
-
-                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1rem 0;">
-
-                    <h4 style="margin-bottom: 0.5rem;">Pricing</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div>
-                            <strong>Base Price:</strong>
-                            <p>${formatCurrency(booking.base_price || 0)}</p>
-                        </div>
-                        <div>
-                            <strong>Total Amount:</strong>
-                            <p style="font-weight: bold; color: var(--primary-color); font-size: 1.1rem;">${formatCurrency(booking.total_amount || 0)}</p>
-                        </div>
-                    </div>
-
-                    <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--dark-gray);">
-                        <em>Booking Date: ${booking.created_at ? formatDateTime(booking.created_at) : 'N/A'}</em>
-                    </p>
-                </div>
-            `;
-
-            detailsDiv.innerHTML = ticketHTML;
         }
 
-        function downloadTicketPDF() {
-            alert('PDF download functionality to be implemented in Phase 11');
+        function displayBookingTicket(booking) {
+            // Booking Reference
+            document.getElementById('bookingRefDisplay').textContent = booking.booking_ref || 'N/A';
+            document.getElementById('bookingDate').textContent = booking.created_at ? formatDate(booking.created_at) : 'N/A';
+
+            // Status Badge
+            const statusBadge = document.getElementById('ticketStatus');
+            const status = booking.payment_status || 'unpaid';
+            statusBadge.textContent = status.toUpperCase();
+            statusBadge.className = `ticket-status ${status.toLowerCase()}`;
+
+            // Passenger Information
+            document.getElementById('passengerName').textContent = booking.passenger_name || 'N/A';
+            document.getElementById('passportNumber').textContent = booking.passport_number || 'N/A';
+            document.getElementById('passportExpiry').textContent = booking.passport_expiry ? formatDate(booking.passport_expiry) : 'N/A';
+
+            // Flight Information
+            document.getElementById('airlineName').textContent = booking.airline_name || 'N/A';
+            document.getElementById('departureCode').textContent = booking.departure_airport || '---';
+            document.getElementById('departureName').textContent = booking.departure_airport || '';
+            document.getElementById('arrivalCode').textContent = booking.arrival_airport || '---';
+            document.getElementById('arrivalName').textContent = booking.arrival_airport || '';
+            document.getElementById('flightCode').textContent = booking.flight_code || 'N/A';
+            document.getElementById('departureDate').textContent = booking.departure_date ? formatDate(booking.departure_date) : 'N/A';
+            document.getElementById('departureTime').textContent = booking.departure_date ? formatTime(booking.departure_date) : 'N/A';
+            document.getElementById('seatNumber').textContent = booking.seat_number || 'N/A';
+            document.getElementById('seatCategory').textContent = booking.seat_category || 'N/A';
+
+            // Pricing Information
+            document.getElementById('basePrice').textContent = formatCurrency(booking.base_price || 0);
+            document.getElementById('serviceCharge').textContent = formatCurrency(booking.service_charge || 0);
+            document.getElementById('discount').textContent = formatCurrency(booking.discount || 0);
+            document.getElementById('totalAmount').textContent = formatCurrency(booking.total_amount || 0);
         }
 
         function printTicket() {
             window.print();
         }
 
+        function downloadTicket() {
+            alert('📥 PDF download feature coming soon!\n\nFor now, you can:\n1. Use the "Print" button and select "Save as PDF"\n2. Contact support@skybridge.lk for a PDF copy');
+        }
+
+        function newSearch() {
+            document.getElementById('searchForm').reset();
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('bookingRef').focus();
+        }
+
+        // Utility Functions
         function formatDate(dateString) {
+            if (!dateString) return 'N/A';
             return new Date(dateString).toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'short', 
@@ -200,13 +452,13 @@
             });
         }
 
-        function formatDateTime(dateString) {
-            return new Date(dateString).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+        function formatTime(timeString) {
+            if (!timeString) return 'N/A';
+            const date = new Date(timeString);
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false
             });
         }
 
@@ -229,18 +481,16 @@
         }
 
         function showLoading(show = true) {
-            const spinner = document.getElementById('loadingSpinner') || createSpinner();
-            spinner.style.display = show ? 'flex' : 'none';
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) {
+                spinner.style.display = show ? 'flex' : 'none';
+            }
         }
 
-        function createSpinner() {
-            const spinner = document.createElement('div');
-            spinner.id = 'loadingSpinner';
-            spinner.className = 'loading-spinner';
-            spinner.innerHTML = '<div class="spinner"></div><p>Loading...</p>';
-            document.body.appendChild(spinner);
-            return spinner;
-        }
+        // Auto-focus on page load
+        window.addEventListener('load', () => {
+            document.getElementById('bookingRef').focus();
+        });
     </script>
 </body>
 </html>
