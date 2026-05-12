@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SkyBridge RMS</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/agent.css">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="logo">SkyBridge RMS</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="userName" class="user-name">Loading...</span>
+                    <span id="userRole" class="user-role">Role</span>
+                </div>
+                <button id="logoutBtn" class="btn btn-logout">Logout</button>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <nav class="sidebar-nav">
+                <div id="agentMenu" style="display: none;">
+                    <a href="#" data-menu="reservation" class="nav-item">
+                        <span class="icon">✈</span> New Reservation
+                    </a>
+                    <a href="#" data-menu="registry" class="nav-item">
+                        <span class="icon">📋</span> Bookings Registry
+                    </a>
+                </div>
+
+                <div id="adminMenu" style="display: none;">
+                    <a href="#" data-menu="dashboard" class="nav-item">
+                        <span class="icon">📊</span> Dashboard
+                    </a>
+                    <a href="#" data-menu="airlines" class="nav-item">
+                        <span class="icon">✈</span> Airlines
+                    </a>
+                    <a href="#" data-menu="agents" class="nav-item">
+                        <span class="icon">👤</span> Agents
+                    </a>
+                    <a href="#" data-menu="reports" class="nav-item">
+                        <span class="icon">📈</span> Reports
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-main">
+            <div id="content" class="content-area">
+                <!-- Dynamic content loads here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="../assets/js/reservation.js"></script>
+    <script src="../assets/js/registry.js"></script>
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>
