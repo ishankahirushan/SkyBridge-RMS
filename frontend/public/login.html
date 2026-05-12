@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBridge RMS - Login</title>
+</head>
+<body>
+  <main>
+    <h1>SkyBridge RMS Login</h1>
+    <p>Use your agent or administrator credentials.</p>
+
+    <form id="login-form" novalidate>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required minlength="6" />
+      </div>
+
+      <button type="submit">Sign In</button>
+    </form>
+
+    <p id="login-message" aria-live="polite"></p>
+  </main>
+
+  <script src="../assets/js/login.js"></script>
+</body>
+</html>

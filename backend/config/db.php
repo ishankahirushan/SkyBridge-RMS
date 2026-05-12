@@ -8,7 +8,7 @@ function getDatabaseConnection(): PDO
     $port = getenv('DB_PORT') ?: '3306';
     $database = getenv('DB_NAME') ?: 'skybridge_rms';
     $username = getenv('DB_USER') ?: 'root';
-    $password = getenv('DB_PASS') ?: '';
+    $password = getenv('DB_PASS') ?: '1234';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
 
