@@ -3,9 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agent Bookings</title>
+  <title>SkyBridge RMS - Booking Management</title>
+  <link rel="stylesheet" href="../assets/css/agent.css" />
 </head>
 <body>
-  <h1>Booking Management</h1>
+  <header class="topbar">
+    <div>
+      <strong>SkyBridge RMS</strong>
+      <span id="session-user"></span>
+    </div>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="flights.html">Flights</a>
+      <a href="passengers.html">Passengers</a>
+      <a class="active" href="bookings.html">Bookings</a>
+      <button id="logout-btn" class="secondary" type="button">Logout</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h1>Create Booking</h1>
+      <form id="create-booking-form" class="grid" novalidate>
+        <div>
+          <label for="booking-passport">Passport No</label>
+          <input id="booking-passport" required />
+        </div>
+        <div>
+          <label for="booking-flight-id">Flight ID</label>
+          <input id="booking-flight-id" type="number" min="1" required />
+        </div>
+        <div>
+          <label for="booking-seat">Seat No (optional)</label>
+          <input id="booking-seat" placeholder="AUTO" />
+        </div>
+        <div>
+          <label for="booking-service">Service Charge</label>
+          <input id="booking-service" type="number" min="0" step="0.01" value="0" />
+        </div>
+        <div>
+          <label for="booking-discount">Discount</label>
+          <input id="booking-discount" type="number" min="0" step="0.01" value="0" />
+        </div>
+        <button type="submit">Create Booking</button>
+      </form>
+      <p id="bookings-message" class="notice">Ready.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Booking Search</h2>
+      <form id="search-booking-form" class="grid" novalidate>
+        <div>
+          <label for="search-booking-ref">Booking Reference</label>
+          <input id="search-booking-ref" placeholder="Leave blank for all" />
+        </div>
+        <button type="submit">Search</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Booking Ref</th>
+            <th>Passenger</th>
+            <th>Flight</th>
+            <th>Route</th>
+            <th>Seat</th>
+            <th>Final Price</th>
+            <th>Booking Status</th>
+            <th>Payment Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="../assets/js/agent-common.js"></script>
+  <script src="../assets/js/agent-bookings.js"></script>
 </body>
 </html>

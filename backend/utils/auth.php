@@ -81,3 +81,17 @@ function requireAdmin(): array
 
     return $user;
 }
+
+function requireAgent(): array
+{
+    $user = requireLogin();
+
+    if (!in_array($user['role'], ['ADMIN', 'AGENT'], true)) {
+        sendJsonResponse([
+            'success' => false,
+            'message' => 'Forbidden.'
+        ], 403);
+    }
+
+    return $user;
+}
