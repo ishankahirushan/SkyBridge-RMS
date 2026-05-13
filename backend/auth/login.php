@@ -32,8 +32,11 @@ try {
         'User logged in successfully'
     );
 
+    // Return a consistent response shape with `data.user`
     success_response('Login successful', [
-        'user' => $_SESSION['user'],
+        'data' => [
+            'user' => $_SESSION['user'],
+        ],
     ]);
 } catch (Throwable $exception) {
     error_response('Login failed', 500, [

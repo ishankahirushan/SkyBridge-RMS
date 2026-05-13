@@ -12,7 +12,9 @@ async function apiCall(endpoint, method = 'GET', data = null) {
             method: method,
             headers: {
                 'Accept': 'application/json'
-            }
+            },
+            // Ensure cookies (PHPSESSID) are sent/received for same-origin requests
+            credentials: 'same-origin'
         };
 
         if (data && method !== 'GET' && method !== 'HEAD') {
@@ -29,7 +31,13 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         }
 
         const response = await fetch(url, options);
-        const result = await response.json();
+            const result = await response.json();
+
+            // Normalize legacy top-level `user` to `data.user` to maintain a
+            // consistent response shape across endpoints.
+            if (result && result.user && !result.data) {
+                result.data = { user: result.user };
+            }
 
         // Check for API errors
         if (result.status === 'error') {
@@ -69,12 +77,11 @@ const Auth = {
  */
 const Flights = {
     async search(departureAirport, arrivalAirport, departureDate) {
-        const params = new URLSearchParams({
+        return apiCall('/flights/search.php', 'POST', {
             departure_airport: departureAirport,
             arrival_airport: arrivalAirport,
             departure_date: departureDate
         });
-        return apiCall(`/flights/search.php?${params}`, 'GET');
     },
 
     async getDetails(flightId) {
@@ -114,8 +121,9 @@ const Bookings = {
  */
 const Passport = {
     async verify(passportNo) {
-        const params = new URLSearchParams({ passport_no: passportNo });
-        return apiCall(`/bookings/verify-passport.php?${params}`, 'GET');
+        return apiCall('/bookings/verify-passport.php', 'POST', {
+            passport_no: passportNo
+        });
     }
 };
 
@@ -123,13 +131,12 @@ const Passport = {
  * Price Calculation API Calls
  */
 const Pricing = {
-    async calculate(flightId, seatCategoryId, passengerCount = 1) {
-        const params = new URLSearchParams({
+    async calculate(flightId, seatCategory, discount = 0) {
+        return apiCall('/bookings/calculate-price.php', 'POST', {
             flight_id: flightId,
-            seat_category_id: seatCategoryId,
-            passenger_count: passengerCount
+            seat_category: seatCategory,
+            discount: discount
         });
-        return apiCall(`/bookings/calculate-price.php?${params}`, 'GET');
     }
 };
 
@@ -154,6 +161,15 @@ const Payments = {
 
     async refund(bookingId) {
         return apiCall('/payments/refund.php', 'POST', { booking_id: bookingId });
+    }
+};
+
+/**
+ * Agent Reports API Calls
+ */
+const Reports = {
+    async dashboard() {
+        return apiCall('/reports/dashboard.php', 'GET');
     }
 };
 

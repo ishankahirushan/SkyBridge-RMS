@@ -35,7 +35,7 @@ function initDashboard() {
         if (isAdmin()) {
             setView('dashboard');
         } else {
-            setView('reservation');
+            setView('home');
         }
     }
 }
@@ -90,6 +90,9 @@ async function setView(view) {
                 break;
             case 'reports':
                 await loadReports();
+                break;
+            case 'home':
+                await loadAgentHome();
                 break;
             case 'reservation':
                 loadReservationWizard();
@@ -190,6 +193,225 @@ async function loadAdminDashboard() {
     } catch (error) {
         console.error('Error loading dashboard data:', error);
     }
+}
+
+/**
+ * Load agent home tab
+ */
+async function loadAgentHome() {
+    const contentArea = document.getElementById('content');
+    
+    contentArea.innerHTML = `
+        <div class="agent-home">
+            <div class="welcome-section">
+                <h2>Welcome, ${currentUser.full_name}!</h2>
+                <p>Reservation Agent Dashboard</p>
+                <button id="refreshHomeBtn" class="btn btn-secondary" style="margin-top: 0.75rem;">Refresh Stats</button>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-widget">
+                    <h3>Total Bookings</h3>
+                    <div id="totalBookings" class="widget-value">--</div>
+                    <p class="widget-unit">all bookings in scope</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Today's Revenue</h3>
+                    <div id="todayRevenue" class="widget-value">--</div>
+                    <p class="widget-unit">completed transactions today</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Refunds Issued</h3>
+                    <div id="refundCount" class="widget-value">--</div>
+                    <p class="widget-unit">refunded bookings</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Active Flights</h3>
+                    <div id="activeFlights" class="widget-value">--</div>
+                    <p class="widget-unit">available seats</p>
+                </div>
+            </div>
+            
+            <div class="home-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <button onclick="setView('reservation'); return false;" class="btn btn-primary btn-large">
+                        <span class="btn-icon">✈</span> New Reservation
+                    </button>
+                    <button onclick="setView('registry'); return false;" class="btn btn-secondary btn-large">
+                        <span class="btn-icon">📋</span> View Bookings
+                    </button>
+                </div>
+            </div>
+            
+            <div class="recent-activity">
+                <h3>Recent Transactions</h3>
+                <div id="recentTransactions">
+                    <p>Loading recent transactions...</p>
+                </div>
+            </div>
+
+            <div class="operational-summaries">
+                <h3>Operational Summaries</h3>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h4>Booking Status Mix</h4>
+                        <div id="bookingStatusSummary"></div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Top Routes</h4>
+                        <div id="topRoutesSummary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Load agent statistics
+    try {
+        const response = await Reports.dashboard();
+        const data = response.data || {};
+        const totals = data.totals || {};
+
+        document.getElementById('totalBookings').textContent = String(totals.total_bookings || 0);
+        document.getElementById('todayRevenue').textContent = formatCurrency(totals.today_revenue || 0);
+        document.getElementById('refundCount').textContent = String(totals.refund_count || 0);
+        document.getElementById('activeFlights').textContent = String(totals.active_flights || 0);
+
+        renderRecentTransactions(data.recent_transactions || []);
+
+        const operational = data.operational_summaries || {};
+        renderBookingStatusSummary(operational.booking_status || []);
+        renderTopRoutesSummary(operational.top_routes || []);
+
+        const refreshBtn = document.getElementById('refreshHomeBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => loadAgentHome());
+        }
+    } catch (error) {
+        console.error('Error loading agent home data:', error);
+        document.getElementById('recentTransactions').innerHTML = '<p>Failed to load transactions.</p>';
+        document.getElementById('bookingStatusSummary').innerHTML = '<p>Failed to load chart data.</p>';
+        document.getElementById('topRoutesSummary').innerHTML = '<p>Failed to load route data.</p>';
+    }
+}
+
+function renderRecentTransactions(transactions) {
+    const container = document.getElementById('recentTransactions');
+    if (!container) return;
+
+    if (!transactions.length) {
+        container.innerHTML = '<p>No recent transactions.</p>';
+        return;
+    }
+
+    const items = transactions.map((txn) => {
+        const passenger = escapeHtml(txn.passenger_name || 'Unknown Passenger');
+        const bookingRef = escapeHtml(txn.booking_ref || '-');
+        const flightNo = escapeHtml(txn.flight_no || '-');
+        const method = escapeHtml(txn.payment_method || '-');
+        const status = escapeHtml(txn.transaction_status || '-');
+        const amount = formatCurrency(txn.amount || 0);
+        const when = txn.created_at ? formatDateTime(txn.created_at) : '-';
+
+        return `
+            <div class="activity-item">
+                <div class="activity-info">
+                    <div class="activity-type">${passenger} - ${amount}</div>
+                    <div class="activity-details">
+                        ${bookingRef} | ${flightNo} | ${method} | ${status}
+                    </div>
+                </div>
+                <div class="activity-time">${when}</div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `<div class="activity-list">${items}</div>`;
+}
+
+function renderBookingStatusSummary(statusRows) {
+    const container = document.getElementById('bookingStatusSummary');
+    if (!container) return;
+
+    if (!statusRows.length) {
+        container.innerHTML = '<p>No booking status data.</p>';
+        return;
+    }
+
+    const total = statusRows.reduce((sum, row) => sum + (row.count || 0), 0);
+    if (total === 0) {
+        container.innerHTML = '<p>No booking status data.</p>';
+        return;
+    }
+
+    const colors = ['#00a86b', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
+    const segments = statusRows.map((row, index) => {
+        const pct = Math.round(((row.count || 0) / total) * 100);
+        return {
+            label: row.status || 'unknown',
+            count: row.count || 0,
+            pct,
+            color: colors[index % colors.length]
+        };
+    });
+
+    let currentAngle = 0;
+    const gradientParts = segments.map((segment) => {
+        const start = currentAngle;
+        const span = Math.round((segment.pct / 100) * 360);
+        const end = currentAngle + span;
+        currentAngle = end;
+        return `${segment.color} ${start}deg ${end}deg`;
+    });
+
+    const legend = segments.map((segment) => `
+        <div class="chart-legend-item">
+            <span class="chart-dot" style="background:${segment.color}"></span>
+            <span>${escapeHtml(segment.label)} (${segment.count})</span>
+        </div>
+    `).join('');
+
+    container.innerHTML = `
+        <div class="pie-chart" style="background: conic-gradient(${gradientParts.join(', ')});"></div>
+        <div class="chart-legend">${legend}</div>
+    `;
+}
+
+function renderTopRoutesSummary(routeRows) {
+    const container = document.getElementById('topRoutesSummary');
+    if (!container) return;
+
+    if (!routeRows.length) {
+        container.innerHTML = '<p>No route data available.</p>';
+        return;
+    }
+
+    const maxCount = Math.max(...routeRows.map(row => row.booking_count || 0), 1);
+
+    const bars = routeRows.map((row) => {
+        const pct = Math.round(((row.booking_count || 0) / maxCount) * 100);
+        return `
+            <div class="bar-row">
+                <div class="bar-label">${escapeHtml(row.route || '-')}</div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width:${pct}%"></div>
+                </div>
+                <div class="bar-value">${row.booking_count || 0}</div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `<div class="bar-chart">${bars}</div>`;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 /**
@@ -391,11 +613,16 @@ async function loadReports() {
  * Load reservation wizard (agent view)
  */
 function loadReservationWizard() {
+    if (typeof window.loadReservationWizard === 'function' && window.loadReservationWizard !== loadReservationWizard) {
+        window.loadReservationWizard();
+        return;
+    }
+
     const contentArea = document.getElementById('content');
     contentArea.innerHTML = `
         <div class="reservation-wizard">
             <h2>New Reservation</h2>
-            <p>Reservation wizard - to be implemented in Phase 11</p>
+            <p>Reservation module not loaded.</p>
         </div>
     `;
 }
