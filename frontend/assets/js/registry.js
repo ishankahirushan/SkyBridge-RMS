@@ -1,96 +1,49 @@
 // SkyBridge RMS - Registry Module
 
-/**
- * Initialize registry functionality
- */
 function initRegistry() {
-    // Placeholder for Phase 12 implementation
-    console.log('Registry module initialized');
+    console.info('Registry module loaded');
 }
 
-/**
- * Load bookings list
- */
-async function loadBookingsList(page = 1, limit = 10) {
-    // To be implemented in Phase 12
+async function loadBookingsList() {
+    return [];
 }
 
-/**
- * Display bookings table
- */
-function displayBookingsTable(bookings) {
-    // To be implemented in Phase 12
+function displayBookingsTable() {}
+
+function filterBookings() {}
+
+async function searchBookings() {
+    return [];
 }
 
-/**
- * Filter bookings
- */
-function filterBookings(criteria) {
-    // To be implemented in Phase 12
+async function viewBookingDetails() {
+    return null;
 }
 
-/**
- * Search bookings
- */
-async function searchBookings(query) {
-    // To be implemented in Phase 12
+async function updateBookingStatus() {
+    return null;
 }
 
-/**
- * View booking details
- */
-async function viewBookingDetails(bookingId) {
-    // To be implemented in Phase 12
+async function processRefund() {
+    return null;
 }
 
-/**
- * Update booking status
- */
-async function updateBookingStatus(bookingId, status) {
-    // To be implemented in Phase 12
-}
+function generateReceipt() {}
 
-/**
- * Process refund
- */
-async function processRefund(bookingId) {
-    // To be implemented in Phase 12
-}
+function downloadReceiptPDF() {}
 
-/**
- * Generate booking receipt
- */
-function generateReceipt(bookingId) {
-    // To be implemented in Phase 12
-}
+function printReceipt() {}
 
-/**
- * Download receipt as PDF
- */
-function downloadReceiptPDF(bookingId) {
-    // To be implemented in Phase 12
-}
-
-/**
- * Print receipt
- */
-function printReceipt(bookingId) {
-    // To be implemented in Phase 12
-}
-
-// Initialize when module is loaded
 document.addEventListener('DOMContentLoaded', initRegistry);
 
-export {
-    initRegistry,
-    loadBookingsList,
-    displayBookingsTable,
-    filterBookings,
-    searchBookings,
-    viewBookingDetails,
-    updateBookingStatus,
-    processRefund,
-    generateReceipt,
-    downloadReceiptPDF,
-    printReceipt
-};
+window.initRegistry = initRegistry;
+window.loadBookingsList = loadBookingsList;
+window.displayBookingsTable = displayBookingsTable;
+window.filterBookings = filterBookings;
+window.searchBookings = searchBookings;
+window.viewBookingDetails = viewBookingDetails;
+window.updateBookingStatus = updateBookingStatus;
+window.processRefund = processRefund;
+window.generateReceipt = generateReceipt;
+window.downloadReceiptPDF = downloadReceiptPDF;
+window.printReceipt = printReceipt;

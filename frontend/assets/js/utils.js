@@ -177,6 +177,18 @@ function getRoleDisplayName(role) {
 }
 
 /**
+ * Debounce helper
+ */
+function debounce(func, delay = 300) {
+    let timeoutId;
+
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+/**
  * Local storage helper functions
  */
 const Storage = {
@@ -204,27 +216,8 @@ const Storage = {
         } catch (e) {
             console.error('Storage error:', e);
         }
-    },
-    
-    clear() {
-        try {
-            localStorage.clear();
-        } catch (e) {
-            console.error('Storage error:', e);
-        }
     }
 };
-
-/**
- * Debounce function for input events
- */
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
 
 /**
  * Generate UUID
@@ -315,28 +308,3 @@ function populateForm(form, data) {
         }
     });
 }
-
-export {
-    showLoading,
-    showSuccess,
-    showError,
-    formatCurrency,
-    formatDate,
-    formatDateTime,
-    formatTime,
-    calculateDuration,
-    isValidEmail,
-    isValidPassword,
-    createStatusBadge,
-    createBookingStatusBadge,
-    getRoleDisplayName,
-    Storage,
-    debounce,
-    generateUUID,
-    deepClone,
-    groupBy,
-    sortBy,
-    filterBy,
-    formToObject,
-    populateForm
-};

@@ -19,6 +19,11 @@ function initAuth() {
         logoutBtn.addEventListener('click', handleLogout);
     }
 
+    if (isAuthenticated() && window.location.pathname.includes('/internal/login.html')) {
+        redirectAfterLogin();
+        return;
+    }
+
     // Check current session
     checkSession();
 }
@@ -49,15 +54,12 @@ async function handleLogin(event) {
 
         if (response.status === 'success') {
             // Store session data
-            sessionStorage.setItem('user', JSON.stringify(response.data));
-            currentSession = response.data;
+            const sessionData = response.data?.user || response.data;
+            sessionStorage.setItem('user', JSON.stringify(sessionData));
+            sessionStorage.setItem('session_expires_at', String(Date.now() + (30 * 60 * 1000)));
+            currentSession = sessionData;
 
-            // Redirect based on role
-            if (response.data.role === 'admin') {
-                window.location.href = '../internal/dashboard.html?view=dashboard';
-            } else {
-                window.location.href = '../internal/dashboard.html?view=reservation';
-            }
+            redirectAfterLogin();
         } else {
             showError(response.message || 'Login failed', 'errorMessage');
         }
@@ -85,6 +87,7 @@ async function handleLogout(event) {
     } finally {
         // Clear session storage
         sessionStorage.removeItem('user');
+        sessionStorage.removeItem('session_expires_at');
         currentSession = null;
 
         // Redirect to login
@@ -106,6 +109,12 @@ function isAuthenticated() {
             }
         }
     }
+
+    if (currentSession && isSessionExpired()) {
+        clearSession();
+        return false;
+    }
+
     return currentSession !== null;
 }
 
@@ -123,6 +132,12 @@ function getSession() {
             }
         }
     }
+
+    if (currentSession && isSessionExpired()) {
+        clearSession();
+        return null;
+    }
+
     return currentSession;
 }
 
@@ -172,6 +187,11 @@ async function checkSession() {
         return false;
     }
 
+    if (currentPath.includes('/internal/login.html') && isAuthenticated()) {
+        redirectAfterLogin();
+        return true;
+    }
+
     return false;
 }
 
@@ -203,6 +223,26 @@ function requireRole(role) {
     }
 
     return true;
+}
+
+function clearSession() {
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('session_expires_at');
+    currentSession = null;
+}
+
+function isSessionExpired() {
+    const expiry = Number(sessionStorage.getItem('session_expires_at') || 0);
+    return expiry > 0 && Date.now() > expiry;
+}
+
+function redirectAfterLogin() {
+    if (isAdmin()) {
+        window.location.href = '../internal/dashboard.html?view=dashboard';
+        return;
+    }
+
+    window.location.href = '../internal/dashboard.html?view=reservation';
 }
 
 /**
@@ -288,53 +328,5 @@ function showLoading(show = true) {
 /**
  * API call function (reused from api.js)
  */
-async function apiCall(endpoint, method = 'GET', data = null) {
-    const API_BASE = 'http://localhost:8000/backend';
-    try {
-        const url = `${API_BASE}${endpoint}`;
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        };
-
-        if (data) {
-            options.body = JSON.stringify(data);
-        }
-
-        const response = await fetch(url, options);
-        const result = await response.json();
-
-        if (result.status === 'error') {
-            throw new Error(result.message || 'API Error');
-        }
-
-        return result;
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
-}
-
 // Initialize auth when document is ready
 document.addEventListener('DOMContentLoaded', initAuth);
-
-export {
-    initAuth,
-    handleLogin,
-    handleLogout,
-    isAuthenticated,
-    getSession,
-    getCurrentUser,
-    hasRole,
-    isAdmin,
-    isAgent,
-    checkSession,
-    requireAuth,
-    requireRole,
-    setupAuthInterceptor,
-    displayUserInfo,
-    setupRoleBasedMenus
-};

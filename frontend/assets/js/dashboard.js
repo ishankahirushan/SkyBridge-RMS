@@ -438,14 +438,3 @@ function createStatusBadge(status) {
 
 // Initialize dashboard when document is ready
 document.addEventListener('DOMContentLoaded', initDashboard);
-
-export {
-    initDashboard,
-    setView,
-    loadAdminDashboard,
-    loadAirlines,
-    loadAgents,
-    loadReports,
-    loadReservationWizard,
-    loadBookingRegistry
-};

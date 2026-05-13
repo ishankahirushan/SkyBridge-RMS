@@ -22,6 +22,7 @@
                         id="email" 
                         name="email" 
                         required 
+                        autofocus
                         placeholder="agent@skybridge.lk"
                     >
                 </div>
@@ -42,13 +43,18 @@
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </form>
 
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+                <p>Signing in...</p>
+            </div>
+
             <div class="login-footer">
                 <p><a href="../public/index.html">Back to Home</a></p>
             </div>
         </div>
     </div>
 
-    <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
 </body>
 </html>

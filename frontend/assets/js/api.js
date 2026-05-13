@@ -11,13 +11,21 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         const options = {
             method: method,
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         };
 
-        if (data) {
-            options.body = JSON.stringify(data);
+        if (data && method !== 'GET' && method !== 'HEAD') {
+            const formData = new URLSearchParams();
+
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value);
+                }
+            });
+
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+            options.body = formData.toString();
         }
 
         const response = await fetch(url, options);
@@ -201,15 +209,4 @@ const Admin = {
             return apiCall(`/admin/reports/bookings.php?${params}`, 'GET');
         }
     }
-};
-
-export {
-    apiCall,
-    Auth,
-    Flights,
-    Bookings,
-    Passport,
-    Pricing,
-    Payments,
-    Admin
 };
