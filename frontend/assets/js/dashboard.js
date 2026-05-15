@@ -634,8 +634,19 @@ async function loadBookingRegistry() {
     const contentArea = document.getElementById('content');
     contentArea.innerHTML = `
         <h2>Bookings Registry</h2>
-        <p>Booking registry - to be implemented in Phase 12</p>
+        <div id="registryContent"></div>
     `;
+
+    // If registry module is loaded, render bookings
+    if (typeof loadAndRenderBookings === 'function') {
+        try {
+            await loadAndRenderBookings();
+        } catch (e) {
+            console.error('Failed to load booking registry:', e);
+            const container = document.getElementById('registryContent');
+            if (container) container.innerHTML = '<p class="error-message">Failed to load bookings.</p>';
+        }
+    }
 }
 
 /**

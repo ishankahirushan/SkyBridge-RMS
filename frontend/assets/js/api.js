@@ -107,7 +107,8 @@ const Bookings = {
     },
 
     async cancel(bookingId) {
-        return apiCall('/bookings/cancel.php', 'POST', { booking_id: bookingId });
+        // Backend expects `booking_ref` in POST body
+        return apiCall('/bookings/cancel.php', 'POST', { booking_ref: bookingId });
     },
 
     async searchByReference(bookingRef) {
@@ -171,7 +172,8 @@ const Payments = {
     },
 
     async refund(bookingId) {
-        return apiCall('/payments/refund.php', 'POST', { booking_id: bookingId });
+        // Backend expects `booking_ref` in POST body
+        return apiCall('/payments/refund.php', 'POST', { booking_ref: bookingId });
     }
 };
 

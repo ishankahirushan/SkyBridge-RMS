@@ -1,0 +1,1 @@
+{"status":"success","message":"Price calculated successfully","flight_id":1,"seat_category":"Economy Class","base_price":15000,"seat_multiplier":1,"service_charge":500,"discount":500,"final_price":15000,"available_seats":147}
