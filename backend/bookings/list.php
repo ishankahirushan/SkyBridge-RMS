@@ -27,7 +27,7 @@ try {
             p.passport_no,
             p.contact_no,
             p.email,
-            p.payment_method,
+            t.payment_method AS transaction_payment_method,
             f.flight_no,
             f.departure_airport,
             f.destination_airport,
@@ -38,6 +38,7 @@ try {
         INNER JOIN passengers p ON p.passenger_id = b.passenger_id
         INNER JOIN flights f ON f.flight_id = b.flight_id
         INNER JOIN airlines a ON a.airline_id = f.airline_id
+        INNER JOIN transactions t ON t.booking_ref = b.booking_ref
     ';
 
     $conditions = [];
@@ -87,7 +88,7 @@ try {
                 'passport_no' => $row['passport_no'],
                 'contact_no' => $row['contact_no'],
                 'email' => $row['email'],
-                'payment_method' => $row['payment_method'],
+                'payment_method' => $row['transaction_payment_method'],
             ],
             'flight' => [
                 'flight_no' => $row['flight_no'],

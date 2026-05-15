@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     transaction_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_ref VARCHAR(50) NOT NULL,
     payment_method ENUM('cash', 'card') NOT NULL,
+    card_no VARCHAR(20) NULL,
     amount DECIMAL(10, 2) NOT NULL,
     transaction_status ENUM('completed', 'pending', 'failed', 'refunded') DEFAULT 'completed',
     transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,

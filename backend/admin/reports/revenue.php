@@ -30,10 +30,9 @@ try {
             SUM(CASE WHEN t.transaction_status = "refunded" THEN 1 ELSE 0 END) as refunded_transactions,
             SUM(CASE WHEN t.transaction_status = "paid" THEN t.amount ELSE 0 END) as total_revenue,
             AVG(CASE WHEN t.transaction_status = "paid" THEN t.amount ELSE NULL END) as avg_transaction_value,
-            COUNT(DISTINCT p.payment_method) as payment_methods
+            COUNT(DISTINCT t.payment_method) as payment_methods
         FROM transactions t
         INNER JOIN bookings b ON b.booking_ref = t.booking_ref
-        INNER JOIN passengers p ON p.passenger_id = b.passenger_id
         WHERE t.created_at BETWEEN ? AND ?
     ');
 
@@ -48,12 +47,11 @@ try {
     $stmt->close();
 
     $stmt2 = $conn->prepare('
-        SELECT p.payment_method, COUNT(*) as count, SUM(t.amount) as total
+        SELECT t.payment_method, COUNT(*) as count, SUM(t.amount) as total
         FROM transactions t
         INNER JOIN bookings b ON b.booking_ref = t.booking_ref
-        INNER JOIN passengers p ON p.passenger_id = b.passenger_id
         WHERE t.created_at BETWEEN ? AND ? AND t.transaction_status = "paid"
-        GROUP BY p.payment_method
+        GROUP BY t.payment_method
     ');
 
     if (!$stmt2) {

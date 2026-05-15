@@ -105,13 +105,13 @@ try {
     $bookingStmt->execute();
     $bookingStmt->close();
 
-    $transactionStmt = $conn->prepare('INSERT INTO transactions (booking_ref, payment_method, amount, transaction_status, created_by) VALUES (?, ?, ?, ?, ?)');
+    $transactionStmt = $conn->prepare('INSERT INTO transactions (booking_ref, payment_method, card_no, amount, transaction_status, created_by) VALUES (?, ?, ?, ?, ?, ?)');
     if (!$transactionStmt) {
         throw new RuntimeException('Failed to prepare transaction insert');
     }
 
     $transactionStatus = 'completed';
-    $transactionStmt->bind_param('ssdsi', $bookingRef, $paymentMethod, $calculatedAmount, $transactionStatus, $agentId);
+    $transactionStmt->bind_param('sssdsi', $bookingRef, $paymentMethod, $cardNo, $calculatedAmount, $transactionStatus, $agentId);
     $transactionStmt->execute();
     $transactionId = $conn->insert_id;
     $transactionStmt->close();

@@ -17,9 +17,10 @@ if ($bookingRef === '') {
 
 try {
     $bookingStmt = $conn->prepare('
-        SELECT b.booking_ref, b.passenger_id, b.flight_id, b.seat_category, b.final_price, b.booking_status, b.payment_status, p.payment_method
+        SELECT b.booking_ref, b.passenger_id, b.flight_id, b.seat_category, b.final_price, b.booking_status, b.payment_status, t.payment_method, t.card_no, p.full_name
         FROM bookings b
         INNER JOIN passengers p ON p.passenger_id = b.passenger_id
+        INNER JOIN transactions t ON t.booking_ref = b.booking_ref
         WHERE b.booking_ref = ? LIMIT 1
     ');
 
@@ -50,6 +51,7 @@ try {
     $agentId = (int) (current_user()['agent_id'] ?? 0);
     $refundAmount = (float) $booking['final_price'];
     $paymentMethod = $booking['payment_method'];
+    $cardNo = trim((string) ($booking['card_no'] ?? ''));
 
     $agency = fetch_agency_config($conn);
     $companyAccount = fetch_company_account($conn, $agency['account_number']);
@@ -63,17 +65,23 @@ try {
 
     $newPassengerBalance = null;
     if ($paymentMethod === 'card') {
-        $passengerAccountStmt = $conn->prepare('SELECT account_id, current_balance FROM payment_accounts WHERE owner_type = "passenger" ORDER BY account_id DESC LIMIT 1');
-        if (!$passengerAccountStmt) {
-            throw new RuntimeException('Database error while fetching card account');
+        if ($cardNo === '') {
+            $cardLookupStmt = $conn->prepare('SELECT card_no FROM payment_accounts WHERE owner_type = "passenger" AND owner_name = ? LIMIT 1');
+            if (!$cardLookupStmt) {
+                throw new RuntimeException('Database error while resolving card account');
+            }
+
+            $cardLookupStmt->bind_param('s', $booking['full_name']);
+            $cardLookupStmt->execute();
+            $cardLookupResult = $cardLookupStmt->get_result();
+            $cardLookup = $cardLookupResult->fetch_assoc();
+            $cardLookupStmt->close();
+
+            $cardNo = trim((string) ($cardLookup['card_no'] ?? ''));
         }
 
-        $passengerAccountStmt->execute();
-        $passengerResult = $passengerAccountStmt->get_result();
-        $passengerAccount = $passengerResult->fetch_assoc();
-        $passengerAccountStmt->close();
-
-        if ($passengerAccount) {
+        if ($cardNo !== '') {
+            $passengerAccount = fetch_card_account($conn, $cardNo);
             $newPassengerBalance = (float) $passengerAccount['current_balance'] + $refundAmount;
             update_balance($conn, (int) $passengerAccount['account_id'], $newPassengerBalance);
         }
