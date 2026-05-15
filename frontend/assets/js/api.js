@@ -144,18 +144,29 @@ const Pricing = {
  * Payment API Calls
  */
 const Payments = {
-    async processCash(bookingId, agencyId) {
+    async processCash(passportNo, contactNo, email, flightId, seatCategory, amount, discount = 0) {
         return apiCall('/payments/process-cash.php', 'POST', {
-            booking_id: bookingId,
-            agency_id: agencyId
+            passport_no: passportNo,
+            contact_no: contactNo,
+            email: email,
+            flight_id: flightId,
+            seat_category: seatCategory,
+            amount: amount,
+            discount: discount
         });
     },
 
-    async processCard(bookingId, agencyId, cardAccountId) {
+    async processCard(passportNo, contactNo, email, flightId, seatCategory, cardNo, companyAccountNo, amount, discount = 0) {
         return apiCall('/payments/process-card.php', 'POST', {
-            booking_id: bookingId,
-            agency_id: agencyId,
-            card_account_id: cardAccountId
+            passport_no: passportNo,
+            contact_no: contactNo,
+            email: email,
+            flight_id: flightId,
+            seat_category: seatCategory,
+            card_no: cardNo,
+            company_account_no: companyAccountNo,
+            amount: amount,
+            discount: discount
         });
     },
 

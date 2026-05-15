@@ -27,6 +27,7 @@ try {
     $passport = fetch_passport_record($conn, $passportNo);
     $pricing = fetch_flight_pricing($conn, $flightId, $seatCategory);
     $agency = fetch_agency_config($conn);
+    $paymentMethod = 'card';
 
     if ($agency['account_number'] !== $companyAccountNo) {
         error_response('Company account number mismatch', 422);
@@ -67,16 +68,31 @@ try {
     update_balance($conn, (int) $cardAccount['account_id'], $newPassengerBalance);
     update_balance($conn, (int) $companyAccount['account_id'], $newCompanyBalance);
 
-    $passengerStmt = $conn->prepare('INSERT INTO passengers (booking_ref, passport_no, full_name, contact_no, email, payment_method, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    if (!$passengerStmt) {
-        throw new RuntimeException('Failed to prepare passenger insert');
+    // Reuse existing passenger if present to avoid duplicate passport entries
+    $passengerId = null;
+    $checkStmt = $conn->prepare('SELECT passenger_id FROM passengers WHERE passport_no = ? LIMIT 1');
+    if (!$checkStmt) {
+        throw new RuntimeException('Failed to prepare passenger lookup');
     }
+    $checkStmt->bind_param('s', $passportNo);
+    $checkStmt->execute();
+    $checkRes = $checkStmt->get_result();
+    $existing = $checkRes->fetch_assoc();
+    $checkStmt->close();
 
-    $paymentMethod = 'card';
-    $passengerStmt->bind_param('ssssssi', $bookingRef, $passportNo, $passport['full_name'], $contactNo, $email, $paymentMethod, $agentId);
-    $passengerStmt->execute();
-    $passengerId = $conn->insert_id;
-    $passengerStmt->close();
+    if ($existing && !empty($existing['passenger_id'])) {
+        $passengerId = (int) $existing['passenger_id'];
+    } else {
+        $passengerStmt = $conn->prepare('INSERT INTO passengers (booking_ref, passport_no, full_name, contact_no, email, payment_method, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        if (!$passengerStmt) {
+            throw new RuntimeException('Failed to prepare passenger insert');
+        }
+
+        $passengerStmt->bind_param('ssssssi', $bookingRef, $passportNo, $passport['full_name'], $contactNo, $email, $paymentMethod, $agentId);
+        $passengerStmt->execute();
+        $passengerId = $conn->insert_id;
+        $passengerStmt->close();
+    }
 
     $bookingStmt = $conn->prepare('INSERT INTO bookings (booking_ref, passenger_id, flight_id, seat_category, agent_id, base_price, service_charge, discount, final_price, booking_status, payment_status, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$bookingStmt) {
@@ -124,6 +140,19 @@ try {
     ]);
 } catch (Throwable $exception) {
     $conn->rollback();
+
+    // Log full exception details to server error log for debugging
+    error_log('[process-card] Exception: ' . $exception->getMessage());
+    error_log('[process-card] Trace: ' . $exception->getTraceAsString());
+
+    // Also append to a persistent log file for easier inspection
+    $logDir = __DIR__ . '/../logs';
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0755, true);
+    }
+    $logFile = $logDir . '/process-card-errors.log';
+    $logEntry = '[' . date('Y-m-d H:i:s') . '] Exception: ' . $exception->getMessage() . PHP_EOL . $exception->getTraceAsString() . PHP_EOL . PHP_EOL;
+    @file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 
     error_response('Card payment failed', 500, [
         'error' => $exception->getMessage(),

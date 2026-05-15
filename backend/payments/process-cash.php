@@ -25,6 +25,7 @@ try {
     $passport = fetch_passport_record($conn, $passportNo);
     $agency = fetch_agency_config($conn);
     $pricing = fetch_flight_pricing($conn, $flightId, $seatCategory);
+    $paymentMethod = 'cash';
 
     $basePrice = (float) $pricing['base_ticket_price'];
     $seatMultiplier = (float) $pricing['price_multiplier'];
@@ -50,16 +51,31 @@ try {
 
     update_balance($conn, (int) $companyAccount['account_id'], $newCompanyBalance);
 
-    $passengerStmt = $conn->prepare('INSERT INTO passengers (booking_ref, passport_no, full_name, contact_no, email, payment_method, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    if (!$passengerStmt) {
-        throw new RuntimeException('Failed to prepare passenger insert');
+    // Reuse existing passenger if exists to avoid duplicate passport entries
+    $passengerId = null;
+    $checkStmt = $conn->prepare('SELECT passenger_id FROM passengers WHERE passport_no = ? LIMIT 1');
+    if (!$checkStmt) {
+        throw new RuntimeException('Failed to prepare passenger lookup');
     }
+    $checkStmt->bind_param('s', $passportNo);
+    $checkStmt->execute();
+    $checkRes = $checkStmt->get_result();
+    $existing = $checkRes->fetch_assoc();
+    $checkStmt->close();
 
-    $paymentMethod = 'cash';
-    $passengerStmt->bind_param('ssssssi', $bookingRef, $passportNo, $passport['full_name'], $contactNo, $email, $paymentMethod, $agentId);
-    $passengerStmt->execute();
-    $passengerId = $conn->insert_id;
-    $passengerStmt->close();
+    if ($existing && !empty($existing['passenger_id'])) {
+        $passengerId = (int) $existing['passenger_id'];
+    } else {
+        $passengerStmt = $conn->prepare('INSERT INTO passengers (booking_ref, passport_no, full_name, contact_no, email, payment_method, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        if (!$passengerStmt) {
+            throw new RuntimeException('Failed to prepare passenger insert');
+        }
+
+        $passengerStmt->bind_param('ssssssi', $bookingRef, $passportNo, $passport['full_name'], $contactNo, $email, $paymentMethod, $agentId);
+        $passengerStmt->execute();
+        $passengerId = $conn->insert_id;
+        $passengerStmt->close();
+    }
 
     $bookingStmt = $conn->prepare('INSERT INTO bookings (booking_ref, passenger_id, flight_id, seat_category, agent_id, base_price, service_charge, discount, final_price, booking_status, payment_status, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$bookingStmt) {

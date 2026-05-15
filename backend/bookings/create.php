@@ -14,15 +14,22 @@ $passengerFullName = trim($_POST['passenger_full_name'] ?? '');
 $passengerContactNo = trim($_POST['passenger_contact_no'] ?? '');
 $passengerEmail = trim($_POST['passenger_email'] ?? '');
 $passportNo = trim($_POST['passport_no'] ?? '');
-$selectedSeats = trim($_POST['selected_seats'] ?? ''); // JSON array of seat numbers
-$totalPrice = (float) ($_POST['total_price'] ?? 0);
+$paymentMethod = trim($_POST['payment_method'] ?? 'cash');
+$basePrice = (float) ($_POST['base_price'] ?? 0);
+$serviceCharge = (float) ($_POST['service_charge'] ?? 0);
+$discount = (float) ($_POST['discount'] ?? 0);
+$finalPrice = (float) ($_POST['final_price'] ?? 0);
 
 if ($flightId <= 0 || !$seatCategory || !$passengerFullName || !$passengerContactNo || !$passengerEmail || !$passportNo) {
     error_response('Required fields are missing', 422);
 }
 
-if ($totalPrice < 0) {
-    error_response('Total price cannot be negative', 422);
+if ($finalPrice < 0) {
+    error_response('Final price cannot be negative', 422);
+}
+
+if (!in_array($paymentMethod, ['cash', 'card'], true)) {
+    error_response('Invalid payment method', 422);
 }
 
 try {
@@ -56,6 +63,21 @@ try {
         error_response('Passport verification not found or invalid', 404);
     }
 
+    $existingPassengerId = null;
+    $passengerLookup = $conn->prepare('SELECT passenger_id FROM passengers WHERE passport_no = ? LIMIT 1');
+    if (!$passengerLookup) {
+        error_response('Database error', 500);
+    }
+    $passengerLookup->bind_param('s', $passportNo);
+    $passengerLookup->execute();
+    $passengerResult = $passengerLookup->get_result();
+    $passengerRow = $passengerResult->fetch_assoc();
+    $passengerLookup->close();
+
+    if ($passengerRow && !empty($passengerRow['passenger_id'])) {
+        $existingPassengerId = (int) $passengerRow['passenger_id'];
+    }
+
     // Start transaction
     $conn->begin_transaction();
 
@@ -63,42 +85,44 @@ try {
         // Create unique booking reference
         $bookingRef = 'BK' . date('YmdHis') . mt_rand(1000, 9999);
 
-        // Insert into passengers table
-        $passengerSql = 'INSERT INTO passengers (booking_id, full_name, contact_no, email, passport_no) VALUES (?, ?, ?, ?, ?)';
-        $passengerStmt = $conn->prepare($passengerSql);
-        if (!$passengerStmt) {
-            throw new Exception('Database error: ' . $conn->error);
-        }
+        if ($existingPassengerId !== null) {
+            $passengerId = $existingPassengerId;
+        } else {
+            // Insert into passengers table
+            $passengerSql = 'INSERT INTO passengers (booking_ref, passport_no, full_name, contact_no, email, payment_method) VALUES (?, ?, ?, ?, ?, ?)';
+            $passengerStmt = $conn->prepare($passengerSql);
+            if (!$passengerStmt) {
+                throw new Exception('Database error: ' . $conn->error);
+            }
 
-        // We'll update the booking_id after creating booking, so for now pass 0
-        $bookingIdPlaceholder = 0;
-        $passengerStmt->bind_param('issss', $bookingIdPlaceholder, $passengerFullName, $passengerContactNo, $passengerEmail, $passportNo);
+            $passengerStmt->bind_param('ssssss', $bookingRef, $passportNo, $passengerFullName, $passengerContactNo, $passengerEmail, $paymentMethod);
+
+            if (!$passengerStmt->execute()) {
+                throw new Exception('Failed to insert passenger: ' . $passengerStmt->error);
+            }
+
+            $passengerId = $passengerStmt->insert_id;
+            $passengerStmt->close();
+        }
 
         // Insert into bookings table
         $agentId = current_user()['agent_id'] ?? null;
-        $bookingStatus = 'confirmed';
+        $bookingStatus = 'active';
+        $paymentStatus = 'pending';
 
-        $bookingSql = 'INSERT INTO bookings (booking_ref, flight_id, agent_id, booking_status, total_price, booking_date, selected_seats) VALUES (?, ?, ?, ?, ?, NOW(), ?)';
+        $bookingSql = 'INSERT INTO bookings (booking_ref, passenger_id, flight_id, seat_category, agent_id, base_price, service_charge, discount, final_price, booking_status, payment_status, booking_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
         $bookingStmt = $conn->prepare($bookingSql);
         if (!$bookingStmt) {
             throw new Exception('Database error: ' . $conn->error);
         }
 
-        $bookingStmt->bind_param('siisds', $bookingRef, $flightId, $agentId, $bookingStatus, $totalPrice, $selectedSeats);
+        $bookingStmt->bind_param('siissddddss', $bookingRef, $passengerId, $flightId, $seatCategory, $agentId, $basePrice, $serviceCharge, $discount, $finalPrice, $bookingStatus, $paymentStatus);
 
         if (!$bookingStmt->execute()) {
             throw new Exception('Failed to insert booking: ' . $bookingStmt->error);
         }
 
-        $bookingId = $bookingStmt->insert_id;
         $bookingStmt->close();
-
-        // Now insert passenger with actual booking_id
-        $passengerStmt->bind_param('issss', $bookingId, $passengerFullName, $passengerContactNo, $passengerEmail, $passportNo);
-        if (!$passengerStmt->execute()) {
-            throw new Exception('Failed to insert passenger: ' . $passengerStmt->error);
-        }
-        $passengerStmt->close();
 
         // Update seat availability if needed (optional: track seat reservations)
         $seatSql = 'UPDATE flight_seat_categories SET available_seats = available_seats - 1 WHERE flight_id = ? AND seat_category = ? AND available_seats > 0';
@@ -118,7 +142,7 @@ try {
             $agentId,
             'booking_created',
             'bookings',
-            (string) $bookingId,
+            $bookingRef,
             'Booking created for passenger ' . $passengerFullName . ' on flight ' . $flightId
         );
 
@@ -126,8 +150,8 @@ try {
         $conn->commit();
 
         success_response('Booking created successfully', [
-            'booking_id' => $bookingId,
             'booking_ref' => $bookingRef,
+            'passenger_id' => $passengerId,
             'flight_id' => $flightId,
             'passenger' => [
                 'full_name' => $passengerFullName,
@@ -135,9 +159,14 @@ try {
                 'email' => $passengerEmail,
                 'passport_no' => $passportNo
             ],
+            'payment_method' => $paymentMethod,
             'seat_category' => $seatCategory,
-            'total_price' => round($totalPrice, 2),
+            'base_price' => round($basePrice, 2),
+            'service_charge' => round($serviceCharge, 2),
+            'discount' => round($discount, 2),
+            'final_price' => round($finalPrice, 2),
             'booking_status' => $bookingStatus,
+            'payment_status' => $paymentStatus,
             'booking_date' => date('Y-m-d H:i:s')
         ]);
     } catch (Throwable $e) {
