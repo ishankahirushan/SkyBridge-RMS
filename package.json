@@ -1,0 +1,12 @@
+{
+  "name": "skybridge-rms",
+  "private": true,
+  "version": "1.0.0",
+  "description": "E2E tests for SkyBridge RMS",
+  "scripts": {
+    "test:e2e": "playwright test tests/phase16-registry.spec.js --reporter=list"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}

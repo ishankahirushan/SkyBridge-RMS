@@ -26,3 +26,15 @@ This is a university level software engineering project designed to simulate the
 ## License
 
 This project is developed for academic and educational purposes only.
+
+## Testing
+
+Run Phase 16 booking registry E2E tests with Playwright:
+
+```bash
+npm install
+npx playwright install
+npm run test:e2e
+```
+
+Note: start the PHP app server first at `http://localhost:8000`.
