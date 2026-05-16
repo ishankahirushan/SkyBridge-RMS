@@ -13,31 +13,41 @@ $agentId = (int) ($_POST['agent_id'] ?? 0);
 $fullName = trim($_POST['full_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $role = trim($_POST['role'] ?? '');
+$status = trim($_POST['status'] ?? '');
 
 if ($agentId === 0) {
     error_response('Agent ID is required', 422);
 }
 
-if ($fullName === '') {
-    error_response('Full name is required', 422);
-}
+// Determine update type: status-only vs full update
+$statusOnly = ($status !== '' && $fullName === '' && $email === '' && $role === '');
 
-if ($email === '') {
-    error_response('Email is required', 422);
-}
-
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    error_response('Invalid email format', 422);
-}
-
-if ($role === '' || !in_array($role, ['admin', 'agent'])) {
-    error_response('Role must be either "admin" or "agent"', 422);
+if (!$statusOnly) {
+    // Full update - require all fields
+    if ($fullName === '') {
+        error_response('Full name is required', 422);
+    }
+    if ($email === '') {
+        error_response('Email is required', 422);
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        error_response('Invalid email format', 422);
+    }
+    if ($role === '' || !in_array($role, ['admin', 'agent'])) {
+        error_response('Role must be either "admin" or "agent"', 422);
+    }
+} else {
+    // Status-only update
+    if ($status !== 'active' && $status !== 'inactive') {
+        error_response('Status must be either "active" or "inactive"', 422);
+    }
 }
 
 try {
     $conn->begin_transaction();
 
-    $stmt = $conn->prepare('SELECT agent_id FROM agents WHERE agent_id = ? LIMIT 1');
+    // Check agent exists
+    $stmt = $conn->prepare('SELECT agent_id, full_name, email, role FROM agents WHERE agent_id = ? LIMIT 1');
     if (!$stmt) {
         throw new RuntimeException('Database error while fetching agent');
     }
@@ -50,54 +60,88 @@ try {
         error_response('Agent not found', 404);
     }
 
+    $agent = $result->fetch_assoc();
     $stmt->close();
 
-    $checkStmt = $conn->prepare('SELECT agent_id FROM agents WHERE email = ? AND agent_id != ? LIMIT 1');
-    if (!$checkStmt) {
-        throw new RuntimeException('Database error while checking email');
+    if ($statusOnly) {
+        // Update only status
+        $updateStmt = $conn->prepare('UPDATE agents SET status = ? WHERE agent_id = ?');
+        if (!$updateStmt) {
+            throw new RuntimeException('Database error while updating agent');
+        }
+
+        $updateStmt->bind_param('si', $status, $agentId);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        $adminId = (int) (current_user()['agent_id'] ?? 0);
+        audit_log(
+            $conn,
+            $adminId,
+            'agent_updated',
+            'agents',
+            (string) $agentId,
+            'Agent status changed to: ' . $status
+        );
+
+        $conn->commit();
+
+        success_response('Agent status updated', [
+            'agent_id' => $agentId,
+            'status' => $status,
+        ]);
+    } else {
+        // Full update
+        // Check email uniqueness if email is being changed
+        if ($email !== $agent['email']) {
+            $checkStmt = $conn->prepare('SELECT agent_id FROM agents WHERE email = ? AND agent_id != ? LIMIT 1');
+            if (!$checkStmt) {
+                throw new RuntimeException('Database error while checking email');
+            }
+
+            $checkStmt->bind_param('si', $email, $agentId);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+
+            if ($checkResult->num_rows > 0) {
+                throw new RuntimeException('Email already in use by another agent');
+            }
+
+            $checkStmt->close();
+        }
+
+        $updateStmt = $conn->prepare('
+            UPDATE agents SET full_name = ?, email = ?, role = ?
+            WHERE agent_id = ?
+        ');
+
+        if (!$updateStmt) {
+            throw new RuntimeException('Database error while updating agent');
+        }
+
+        $updateStmt->bind_param('sssi', $fullName, $email, $role, $agentId);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        $adminId = (int) (current_user()['agent_id'] ?? 0);
+        audit_log(
+            $conn,
+            $adminId,
+            'agent_updated',
+            'agents',
+            (string) $agentId,
+            'Agent updated: ' . $fullName . ' with role ' . $role
+        );
+
+        $conn->commit();
+
+        success_response('Agent updated', [
+            'agent_id' => $agentId,
+            'full_name' => $fullName,
+            'email' => $email,
+            'role' => $role,
+        ]);
     }
-
-    $checkStmt->bind_param('si', $email, $agentId);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-
-    if ($checkResult->num_rows > 0) {
-        throw new RuntimeException('Email already in use by another agent');
-    }
-
-    $checkStmt->close();
-
-    $updateStmt = $conn->prepare('
-        UPDATE agents SET full_name = ?, email = ?, role = ?
-        WHERE agent_id = ?
-    ');
-
-    if (!$updateStmt) {
-        throw new RuntimeException('Database error while updating agent');
-    }
-
-    $updateStmt->bind_param('sssi', $fullName, $email, $role, $agentId);
-    $updateStmt->execute();
-    $updateStmt->close();
-
-    $adminId = (int) (current_user()['agent_id'] ?? 0);
-    audit_log(
-        $conn,
-        $adminId,
-        'agent_updated',
-        'agents',
-        (string) $agentId,
-        'Agent updated: ' . $fullName . ' with role ' . $role
-    );
-
-    $conn->commit();
-
-    success_response('Agent updated', [
-        'agent_id' => $agentId,
-        'full_name' => $fullName,
-        'email' => $email,
-        'role' => $role,
-    ]);
 } catch (Throwable $exception) {
     $conn->rollback();
 

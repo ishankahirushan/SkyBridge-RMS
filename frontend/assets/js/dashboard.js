@@ -184,12 +184,46 @@ async function loadAdminDashboard() {
 
     // Load dashboard data
     try {
+        // Load airlines count
         const airlines = await Admin.airlines.list();
         document.getElementById('airlinesCount').textContent = airlines.data?.length || 0;
 
+        // Load agents count
         const agents = await Admin.agents.list();
         const activeAgents = agents.data?.filter(a => a.status === 'active').length || 0;
         document.getElementById('agentsCount').textContent = activeAgents;
+
+        // Load bookings count
+        try {
+            const bookingsResponse = await fetch('/backend/bookings/list.php');
+            if (bookingsResponse.ok) {
+                const bookingsData = await bookingsResponse.json();
+                const bookingsCount = bookingsData.data?.bookings?.length || 0;
+                document.getElementById('bookingsCount').textContent = bookingsCount;
+            }
+        } catch (e) {
+            console.error('Failed to load bookings count:', e);
+            document.getElementById('bookingsCount').textContent = '0';
+        }
+
+        // Load revenue
+        try {
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const start = startOfMonth.toISOString().split('T')[0];
+            const end = today.toISOString().split('T')[0];
+            
+            const revenueResponse = await fetch(`/backend/admin/reports/revenue.php?start_date=${start}&end_date=${end}`);
+            if (revenueResponse.ok) {
+                const revenueData = await revenueResponse.json();
+                const revenue = revenueData.data?.summary?.total_revenue || 0;
+                document.getElementById('revenueAmount').textContent = 
+                    new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(revenue);
+            }
+        } catch (e) {
+            console.error('Failed to load revenue:', e);
+            document.getElementById('revenueAmount').textContent = 'LKR 0.00';
+        }
     } catch (error) {
         console.error('Error loading dashboard data:', error);
     }
@@ -434,7 +468,8 @@ async function loadAirlines() {
 
     try {
         const response = await Admin.airlines.list();
-        displayAirlinesList(response.data || []);
+        const airlines = (response.data && response.data.airlines) ? response.data.airlines : (response.airlines || []);
+        displayAirlinesList(airlines);
     } catch (error) {
         contentArea.innerHTML = `<div class="error-message">Error loading airlines: ${error.message}</div>`;
     }
@@ -476,6 +511,7 @@ function displayAirlinesList(airlines) {
                 <td>
                     <div class="table-actions">
                         <button onclick="editAirline(${airline.airline_id})" class="action-btn action-btn-edit">Edit</button>
+                        <button class="action-btn action-btn-toggle" data-airline-id="${airline.airline_id}" data-airline-status="${airline.status}">${airline.status === 'active' ? 'Disable' : 'Enable'}</button>
                     </div>
                 </td>
             </tr>
@@ -488,6 +524,32 @@ function displayAirlinesList(airlines) {
     `;
 
     listDiv.innerHTML = html;
+    
+    // Attach toggle handlers
+    listDiv.querySelectorAll('.action-btn-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-airline-id');
+            const current = btn.getAttribute('data-airline-status');
+            const newStatus = current === 'active' ? 'inactive' : 'active';
+
+            try {
+                btn.disabled = true;
+                await Admin.airlines.update(parseInt(id, 10), {
+                    airline_name: airlines.find(a => a.airline_id == id).airline_name,
+                    country: airlines.find(a => a.airline_id == id).country,
+                    status: newStatus
+                });
+                // Refresh list
+                const res = await Admin.airlines.list();
+                displayAirlinesList(res.data || res.airlines || []);
+            } catch (e) {
+                console.error('Failed to toggle airline status', e);
+                alert('Failed to update airline status');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
 }
 
 /**
@@ -526,7 +588,8 @@ async function loadAgents() {
 
     try {
         const response = await Admin.agents.list();
-        displayAgentsList(response.data || []);
+        const agents = (response.data && response.data.agents) ? response.data.agents : (response.agents || []);
+        displayAgentsList(agents);
     } catch (error) {
         contentArea.innerHTML = `<div class="error-message">Error loading agents: ${error.message}</div>`;
     }
@@ -568,6 +631,7 @@ function displayAgentsList(agents) {
                 <td>
                     <div class="table-actions">
                         <button onclick="editAgent(${agent.agent_id})" class="action-btn action-btn-edit">Edit</button>
+                        <button class="action-btn action-btn-toggle" data-agent-id="${agent.agent_id}" data-agent-name="${agent.full_name}" data-agent-status="${agent.status}">${agent.status === 'active' ? 'Disable' : 'Enable'}</button>
                     </div>
                 </td>
             </tr>
@@ -580,6 +644,34 @@ function displayAgentsList(agents) {
     `;
 
     listDiv.innerHTML = html;
+    
+    // Attach toggle handlers
+    listDiv.querySelectorAll('.action-btn-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-agent-id');
+            const current = btn.getAttribute('data-agent-status');
+            const name = btn.getAttribute('data-agent-name');
+            const newStatus = current === 'active' ? 'inactive' : 'active';
+
+            try {
+                btn.disabled = true;
+                await Admin.agents.update(parseInt(id, 10), {
+                    status: newStatus
+                       ,
+                    full_name: name
+                });
+                // Refresh list
+                const res = await Admin.agents.list();
+                const updatedAgents = (res.data && res.data.agents) ? res.data.agents : (res.agents || []);
+                displayAgentsList(updatedAgents);
+            } catch (e) {
+                console.error('Failed to toggle agent status', e);
+                alert('Failed to update agent status');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
 }
 
 /**
@@ -603,10 +695,67 @@ function editAgent(agentId) {
  */
 async function loadReports() {
     const contentArea = document.getElementById('content');
+    
     contentArea.innerHTML = `
-        <h2>Reports & Analytics</h2>
-        <p>Reports section - to be implemented in Phase 14</p>
+        <div class="admin-section">
+            <h2>Reports & Analytics</h2>
+            <div id="reportsSummary"></div>
+            <div id="revenueChart" style="margin-top: 2rem;"></div>
+            <div id="paymentChart" style="margin-top: 2rem;"></div>
+        </div>
     `;
+
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+        
+        const revenueRes = await Admin.reports.revenue(startOfMonth, today);
+        const revenue = revenueRes.data || revenueRes;
+        
+        renderRevenueReport(revenue);
+    } catch (error) {
+        contentArea.innerHTML = `<div class="error-message">Error loading reports: ${error.message}</div>`;
+    }
+}
+
+function renderRevenueReport(data) {
+    const summaryDiv = document.getElementById('reportsSummary');
+    const summary = data.summary || {};
+    
+    const html = `
+        <div class="report-summary" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+            <div class="report-card" style="border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
+                <h4>Total Transactions</h4>
+                <div style="font-size: 2rem; font-weight: bold;">${summary.total_transactions || 0}</div>
+            </div>
+            <div class="report-card" style="border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
+                <h4>Successful</h4>
+                <div style="font-size: 2rem; font-weight: bold;">${summary.successful_transactions || 0}</div>
+            </div>
+            <div class="report-card" style="border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
+                <h4>Refunded</h4>
+                <div style="font-size: 2rem; font-weight: bold;">${summary.refunded_transactions || 0}</div>
+            </div>
+            <div class="report-card" style="border: 1px solid #ddd; padding: 1rem; border-radius: 4px;">
+                <h4>Total Revenue</h4>
+                <div style="font-size: 2rem; font-weight: bold;">LKR ${(summary.total_revenue || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+            </div>
+        </div>
+    `;
+    
+    summaryDiv.innerHTML = html;
+    
+    // Render payment breakdown
+    const paymentDiv = document.getElementById('paymentChart');
+    const breakdown = data.payment_breakdown || [];
+    let paymentHtml = '<h3>Payment Methods</h3><table class="admin-table"><thead><tr><th>Method</th><th>Count</th><th>Amount</th></tr></thead><tbody>';
+    
+    breakdown.forEach(row => {
+        paymentHtml += `<tr><td>${row.payment_method}</td><td>${row.transaction_count}</td><td>LKR ${(row.total_amount || 0).toLocaleString('en-US', {maximumFractionDigits: 2})}</td></tr>`;
+    });
+    
+    paymentHtml += '</tbody></table>';
+    paymentDiv.innerHTML = paymentHtml;
 }
 
 /**
