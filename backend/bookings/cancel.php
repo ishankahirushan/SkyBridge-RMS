@@ -17,7 +17,7 @@ if ($bookingRef === '') {
 
 try {
     $bookingStmt = $conn->prepare('
-        SELECT b.booking_ref, b.flight_id, b.seat_category, b.booking_status, b.payment_status
+        SELECT b.booking_ref, b.flight_id, b.seat_category, b.booking_status, b.payment_status, b.agent_id
         FROM bookings b
         WHERE b.booking_ref = ? LIMIT 1
     ');
@@ -44,9 +44,16 @@ try {
         error_response('Cannot cancel paid bookings directly. Please use the refund endpoint instead.', 409);
     }
 
-    $conn->begin_transaction();
+    $user = current_user();
+    $agentId = (int) ($user['agent_id'] ?? 0);
+    $isAdmin = ($user['role'] ?? '') === 'admin';
 
-    $agentId = (int) (current_user()['agent_id'] ?? 0);
+    // Enforce ownership for non-admin users
+    if (!$isAdmin && ((int) ($booking['agent_id'] ?? 0) !== $agentId)) {
+        error_response('Not authorized to cancel this booking', 403);
+    }
+
+    $conn->begin_transaction();
 
     $cancelStmt = $conn->prepare('UPDATE bookings SET booking_status = ?, updated_by = ? WHERE booking_ref = ?');
     if (!$cancelStmt) {

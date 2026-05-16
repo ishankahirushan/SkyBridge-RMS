@@ -102,6 +102,10 @@ async function loadAndRenderBookings() {
         </thead>
         <tbody>`;
 
+    const session = getCurrentUser();
+    const isAgentUser = session && session.role === 'agent';
+    const sessionAgentId = Number((session && (session.agent_id || session.agentId)) || 0);
+
     bookings.forEach(b => {
         const bookingRef = escapeHtml(b.booking_ref || b.bookingRef || 'N/A');
         const passenger = escapeHtml((b.passenger && (b.passenger.name || b.passenger.full_name)) || b.passenger_name || b.passengerName || 'N/A');
@@ -113,7 +117,8 @@ async function loadAndRenderBookings() {
         const status = escapeHtml(statusValue);
         const paymentStatusValue = String(b.payment_status || b.paymentStatus || '');
 
-        const canCancel = statusValue.toLowerCase() === 'active';
+        const ownerId = Number(b.agent_id ?? b.agentId ?? 0);
+        const canCancel = statusValue.toLowerCase() === 'active' && (!isAgentUser || ownerId === sessionAgentId);
 
         html += `<tr style="border-bottom:1px solid #f1f1f1;">
             <td>${bookingRef}</td>
@@ -126,7 +131,7 @@ async function loadAndRenderBookings() {
             <td>`;
 
         if (canCancel) {
-            html += `<button class="btn-cancel" data-booking-ref="${bookingRef}" data-booking-status="${escapeHtml(statusValue)}" data-payment-status="${escapeHtml(paymentStatusValue)}">Cancel</button>`;
+            html += `<button class="btn-cancel" data-booking-ref="${bookingRef}" data-booking-status="${escapeHtml(statusValue)}" data-payment-status="${escapeHtml(paymentStatusValue)}" data-agent-id="${ownerId}">Cancel</button>`;
         } else {
             html += `<span style="color:#666;">-</span>`;
         }
@@ -143,11 +148,13 @@ async function loadAndRenderBookings() {
             const bookingRef = btn.getAttribute('data-booking-ref') || '';
             const bookingStatus = btn.getAttribute('data-booking-status') || '';
             const paymentStatus = btn.getAttribute('data-payment-status') || '';
+            const agentId = btn.getAttribute('data-agent-id') || '';
 
             processRefund({
                 booking_ref: bookingRef,
                 booking_status: bookingStatus,
                 payment_status: paymentStatus,
+                agent_id: agentId,
             });
         });
     });

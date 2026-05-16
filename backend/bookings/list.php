@@ -8,14 +8,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 require_auth(['admin', 'agent']);
 
-$status = trim($_GET['status'] ?? '');
-$limit = min((int) ($_GET['limit'] ?? 50), 1000);
-$offset = max(0, (int) ($_GET['offset'] ?? 0));
+    $status = trim($_GET['status'] ?? '');
+    $limit = min((int) ($_GET['limit'] ?? 50), 1000);
+    $offset = max(0, (int) ($_GET['offset'] ?? 0));
+
+    $user = current_user();
+    $isAdmin = ($user['role'] ?? '') === 'admin';
 
 try {
     $query = '
         SELECT 
             b.booking_ref,
+            b.agent_id,
             b.passenger_id,
             b.flight_id,
             b.seat_category,
@@ -42,13 +46,20 @@ try {
     ';
 
     $conditions = [];
-    $params = [];
-    $types = '';
+    $filterParams = [];
+    $filterTypes = '';
 
     if ($status !== '') {
         $conditions[] = 'b.booking_status = ?';
-        $params[] = $status;
-        $types .= 's';
+        $filterParams[] = $status;
+        $filterTypes .= 's';
+    }
+
+    // Apply agent scoping for non-admin users
+    if (!$isAdmin) {
+        $conditions[] = 'b.agent_id = ?';
+        $filterParams[] = (int) ($user['agent_id'] ?? 0);
+        $filterTypes .= 'i';
     }
 
     if (!empty($conditions)) {
@@ -56,6 +67,8 @@ try {
     }
 
     $query .= ' ORDER BY b.created_at DESC LIMIT ? OFFSET ?';
+    $params = $filterParams;
+    $types = $filterTypes;
     $params[] = $limit;
     $params[] = $offset;
     $types .= 'ii';
@@ -77,6 +90,7 @@ try {
         $bookings[] = [
             'booking_ref' => $row['booking_ref'],
             'passenger_id' => (int) $row['passenger_id'],
+            'agent_id' => isset($row['agent_id']) ? (int) $row['agent_id'] : null,
             'flight_id' => (int) $row['flight_id'],
             'seat_category' => $row['seat_category'],
             'final_price' => (float) $row['final_price'],
@@ -109,7 +123,7 @@ try {
     }
 
     if (!empty($conditions)) {
-        $totalStmt->bind_param($types, ...$params);
+        $totalStmt->bind_param($filterTypes, ...$filterParams);
     }
 
     $totalStmt->execute();

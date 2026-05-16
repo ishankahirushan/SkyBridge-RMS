@@ -17,7 +17,7 @@ if ($bookingRef === '') {
 
 try {
     $bookingStmt = $conn->prepare('
-        SELECT b.booking_ref, b.passenger_id, b.flight_id, b.seat_category, b.final_price, b.booking_status, b.payment_status, t.payment_method, t.card_no, p.full_name
+        SELECT b.booking_ref, b.passenger_id, b.flight_id, b.seat_category, b.final_price, b.booking_status, b.payment_status, b.agent_id, t.payment_method, t.card_no, p.full_name
         FROM bookings b
         INNER JOIN passengers p ON p.passenger_id = b.passenger_id
         INNER JOIN transactions t ON t.booking_ref = b.booking_ref
@@ -46,9 +46,16 @@ try {
         error_response('Only paid bookings can be refunded', 409);
     }
 
-    $conn->begin_transaction();
+    $user = current_user();
+    $agentId = (int) ($user['agent_id'] ?? 0);
+    $isAdmin = ($user['role'] ?? '') === 'admin';
 
-    $agentId = (int) (current_user()['agent_id'] ?? 0);
+    // Enforce ownership for non-admin users
+    if (!$isAdmin && ((int) ($booking['agent_id'] ?? 0) !== $agentId)) {
+        error_response('Not authorized to refund this booking', 403);
+    }
+
+    $conn->begin_transaction();
     $refundAmount = (float) $booking['final_price'];
     $paymentMethod = $booking['payment_method'];
     $cardNo = trim((string) ($booking['card_no'] ?? ''));
